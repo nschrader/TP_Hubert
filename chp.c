@@ -9,15 +9,24 @@
 #include "chp.h"
 #include "hubert.h"
 
+#define fatalError(x) _fatalError("[Fatal] " x);
+static void _fatalError(char* errorMessage) {
+  if (errno == EINTR) {
+    // There was a signal so we need to exit, but it's not en error
+    exit(EXIT_SUCCESS);
+  }
+  perror(errorMessage);
+  if (errno == ENOENT) {
+    fprintf(stderr, "Is %s running?\n", HUBERT_NAME);
+  }
+  exit(EXIT_FAILURE);
+}
+
 static MessageQueue getMessageQueue(key_t key, bool shouldCreate) {
   int flags = shouldCreate ? (IPC_CREAT | IPC_ALLWRITE) : IPC_NOFLAGS;
   MessageQueue queue = msgget(key, flags);
   if (queue == ERROR) {
-    perror("[Fatal] Could not open message queue");
-    if (errno == ENOENT) {
-      fprintf(stderr, "Is %s running?\n", HUBERT_NAME);
-    }
-    exit(EXIT_FAILURE);
+    fatalError("Could not open message queue");
   }
   return queue;
 }
@@ -32,7 +41,20 @@ MessageQueue openMessageQueue(key_t key) {
 
 void removeMessageQueue(MessageQueue id) {
   if (msgctl(id, IPC_RMID, NULL) == ERROR) {
-    perror("[Fatal] Could not open message queue");
-    exit(EXIT_FAILURE);
+    fatalError("Could not open message queue");
+  }
+}
+
+Request waitForMessageQueue(MessageQueue id, Address forAddress) {
+  Request request;
+  if (msgrcv(id, &request, REQUEST_PAYLOAD_SIZE, forAddress, IPC_NOFLAGS) == ERROR) {
+    fatalError("Cannot read from message queue");
+  }
+  return request;
+}
+
+void sendViaMessageQueue(MessageQueue id, Request request) {
+  if (msgsnd(id, &request, REQUEST_PAYLOAD_SIZE, IPC_NOFLAGS) == ERROR) {
+    fatalError("Cannot send via message queue");
   }
 }

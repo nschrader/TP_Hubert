@@ -9,7 +9,7 @@
 #include "chp.h"
 
 static MessageQueue clientCom = ERROR;
-static Address addressCounter = FIRST_ADDRESS;
+static Address addressCounter = FIRST_ADDR;
 
 void removeQueuesHandler() {
   if (clientCom != ERROR) {
@@ -33,21 +33,13 @@ int main() {
   removeQueuesOnExit();
 
   while (true) {
-    Request request;
-    if (msgrcv(clientCom, &request, REQUEST_PAYLOAD_SIZE, HUBERT, IPC_NOFLAGS) == ERROR) {
-      goto error;
-    }
-    printf("Got request no %d form %d\n", request.cmd, request.source);
-    RequestData data;
-    data.address = addressCounter++;
-    Request request2 = {NO_ADDRESS, HUBERT, TALK, data};
-    if (msgsnd(clientCom, &request2, REQUEST_PAYLOAD_SIZE, IPC_NOFLAGS) == ERROR) {
-      goto error;
-    }
-  }
-  return EXIT_SUCCESS;
+    Request requestIn = waitForMessageQueue(clientCom, HUBERT_ADDR);
+    printf("Got request no %ld form %ld\n", requestIn.cmd, requestIn.source);
 
-  error:
-  perror("123");
-  return EXIT_FAILURE;
+    RequestData data = { .address = addressCounter++ };
+    Request requestOut = {NO_ADDR, HUBERT_ADDR, TALK, data};
+    sendViaMessageQueue(clientCom, requestOut);
+  }
+
+  return EXIT_SUCCESS;
 }
