@@ -1,6 +1,7 @@
 #ifndef CHP_H
 #define CHP_H
 
+#include <sys/types.h>
 #include "entity.h"
 
 #define CLIENT_COM    0xBEEF
@@ -11,7 +12,7 @@
 #define HUBERT        0xBABE
 
 #define ERROR         -1
-#define IPC_NOFLAG    0
+#define IPC_NOFLAGS   0
 #define IPC_ALLWRITE  0666
 
 typedef int MessageQueue;
@@ -36,5 +37,9 @@ typedef struct {
 
 #define REQUEST_PAYLOAD_SIZE (sizeof(Request)-sizeof(long))
 #define NO_REQUEST_DATA ((RequestData) 0)
+
+MessageQueue createMessageQueue(key_t key);
+MessageQueue openMessageQueue(key_t key);
+void removeMessageQueue(MessageQueue id);
 
 #endif
