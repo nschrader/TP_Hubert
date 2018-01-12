@@ -1,32 +1,39 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-typedef struct {
-  User* client;
-  Dish[] offer;
+struct _Menu;
+struct _Restaurant;
+struct _Dish;
+struct _Order;
+struct _User;
+
+typedef struct _Menu {
+  struct _User* client;
+  struct _Dish* offer;
   int offerN;
 } Menu;
 
-typedef struct {
+typedef struct _Restaurant {
   int id;
   char* name;
-  Dish[] stock;
+  struct _Dish* stock;
   int stockN;
 } Restaurant;
 
-typedef struct {
+typedef struct _Dish {
   int id;
   char* name;
+  int price; //cents
   int quantity;
 } Dish;
 
-typedef struct {
-  User* client;
-  Dish[] dishes;
+typedef struct _Order {
+  struct _User* client;
+  struct _Dish* dishes;
   int dishesN;
 } Order;
 
-typedef struct {
+typedef struct _User {
   int id;
   char* name;
 } User;
