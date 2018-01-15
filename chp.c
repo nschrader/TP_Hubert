@@ -1,6 +1,7 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+#include <sys/sem.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -8,6 +9,9 @@
 
 #include "chp.h"
 #include "hubert.h"
+
+#define SIGNLETON 1
+#define ONLY_SEMAPHORE 0
 
 #define fatalError(x) _fatalError("[Fatal] " x);
 static void _fatalError(char* errorMessage) {
@@ -22,39 +26,90 @@ static void _fatalError(char* errorMessage) {
   exit(EXIT_FAILURE);
 }
 
-static MessageQueue getMessageQueue(key_t key, bool shouldCreate) {
+static MessageQueue* getMessageQueue(key_t key, bool shouldCreate) {
+  MessageQueue* queue = malloc(sizeof(MessageQueue));
   int flags = shouldCreate ? (IPC_CREAT | IPC_ALLWRITE) : IPC_NOFLAGS;
-  MessageQueue queue = msgget(key, flags);
-  if (queue == ERROR) {
-    fatalError("Could not open message queue");
+  queue->msqid = msgget(key, flags);
+  if (queue->msqid == ERROR) {
+    goto error;
+  }
+  queue->semid = semget(key, SIGNLETON, flags);
+  if (queue->semid == ERROR) {
+    goto cleanMsg;
+  }
+  if (semctl(queue->semid, ONLY_SEMAPHORE, SETVAL, 1) == ERROR) {
+    goto cleanSemAndMsg;
   }
   return queue;
+
+  cleanMsg:
+  msgctl(queue->msqid, IPC_RMID, NULL);
+  cleanSemAndMsg:
+  msgctl(queue->semid, ONLY_SEMAPHORE, IPC_RMID);
+  error:
+  fatalError("Could not open message queue or semaphore");
+  free(queue);
+  return NULL;
 }
 
-MessageQueue createMessageQueue(key_t key) {
+MessageQueue* createMessageQueue(key_t key) {
   return getMessageQueue(key, true);
 }
 
-MessageQueue openMessageQueue(key_t key) {
+MessageQueue* openMessageQueue(key_t key) {
   return getMessageQueue(key, false);
 }
 
-void removeMessageQueue(MessageQueue id) {
-  if (msgctl(id, IPC_RMID, NULL) == ERROR) {
-    fatalError("Could not open message queue");
+void removeMessageQueue(MessageQueue* queue) {
+  if (msgctl(queue->msqid, IPC_RMID, NULL) == ERROR) {
+    goto error;
+  }
+  if (msgctl(queue->semid, ONLY_SEMAPHORE, IPC_RMID) == ERROR) {
+    goto error;
+  }
+  free(queue);
+  return;
+
+  error:
+  fatalError("Could not open message queue");
+}
+
+static void operateOnSemaphore(int semid, int val) {
+  struct sembuf operation;
+  operation.sem_num = ONLY_SEMAPHORE;
+  operation.sem_op = val;
+  operation.sem_flg = IPC_NOFLAGS;
+  if (semop(semid, &operation, 1) == ERROR) {
+    fatalError("Could not operate on semaphore");
   }
 }
 
-Request waitForMessageQueue(MessageQueue id, Address forAddress) {
-  Request request;
-  if (msgrcv(id, &request, REQUEST_PAYLOAD_SIZE, forAddress, IPC_NOFLAGS) == ERROR) {
+static void V(int semid) {
+  operateOnSemaphore(semid, 1);
+}
+
+static void P(int semid) {
+  printf("Before operation: %d\n", semctl(semid, 0, GETVAL));
+  operateOnSemaphore(semid, -1);
+}
+
+Request* waitForMessageQueue(MessageQueue* queue, Address forAddress) {
+  Request* request = malloc(sizeof(Request));
+  if (msgrcv(queue->msqid, request, REQUEST_PAYLOAD_SIZE, forAddress, IPC_NOFLAGS) == ERROR) {
+    free(request);
     fatalError("Cannot read from message queue");
+  }
+  if (forAddress == NO_ADDR) {
+    V(queue->semid);
   }
   return request;
 }
 
-void sendViaMessageQueue(MessageQueue id, Request request) {
-  if (msgsnd(id, &request, REQUEST_PAYLOAD_SIZE, IPC_NOFLAGS) == ERROR) {
+void sendViaMessageQueue(MessageQueue* queue, Request* request) {
+  if (request->source == NO_ADDR) {
+    P(queue->semid);
+  }
+  if (msgsnd(queue->msqid, request, REQUEST_PAYLOAD_SIZE, IPC_NOFLAGS) == ERROR) {
     fatalError("Cannot send via message queue");
   }
 }

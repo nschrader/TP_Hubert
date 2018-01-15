@@ -8,13 +8,13 @@
 
 #include "chp.h"
 
-static MessageQueue clientCom = ERROR;
+static MessageQueue* clientCom = NULL;
 static Address addressCounter = FIRST_ADDR;
 
 void removeQueuesHandler() {
-  if (clientCom != ERROR) {
+  if (clientCom != NULL) {
     removeMessageQueue(clientCom);
-    clientCom = ERROR;
+    clientCom = NULL;
   }
 }
 
@@ -33,12 +33,12 @@ int main() {
   removeQueuesOnExit();
 
   while (true) {
-    Request requestIn = waitForMessageQueue(clientCom, HUBERT_ADDR);
-    printf("Got request no %ld form %ld\n", requestIn.cmd, requestIn.source);
+    Request* requestIn = waitForMessageQueue(clientCom, HUBERT_ADDR);
+    printf("Got request no %ld form %ld\n", requestIn->cmd, requestIn->source);
 
     RequestData data = { .address = addressCounter++ };
     Request requestOut = {NO_ADDR, HUBERT_ADDR, TALK, data};
-    sendViaMessageQueue(clientCom, requestOut);
+    sendViaMessageQueue(clientCom, &requestOut);
   }
 
   return EXIT_SUCCESS;

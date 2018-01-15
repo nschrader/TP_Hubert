@@ -7,13 +7,13 @@
 #include "chp.h"
 
 int main() {
-  MessageQueue clientCom = openMessageQueue(CLIENT_COM);
+  MessageQueue* clientCom = openMessageQueue(CLIENT_COM);
 
   Request request = {HUBERT_ADDR, NO_ADDR, TALK, NO_REQUEST_DATA};
-  sendViaMessageQueue(clientCom, request);
+  sendViaMessageQueue(clientCom, &request);
 
-  request = waitForMessageQueue(clientCom, NO_ADDR);
-  printf("We have no address %d\n", request.data.address);
-  
+  Request* requestP = waitForMessageQueue(clientCom, NO_ADDR);
+  printf("We have no address %d\n", requestP->data.address);
+
   return EXIT_SUCCESS;
 }

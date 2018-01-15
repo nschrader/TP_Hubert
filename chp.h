@@ -15,8 +15,12 @@
 #define IPC_NOFLAGS   0
 #define IPC_ALLWRITE  0666
 
-typedef int MessageQueue;
 typedef long Address;
+
+typedef struct {
+  int msqid;
+  int semid;
+} MessageQueue;
 
 typedef enum {
   TALK, MENU, ORDER, OK, KO
@@ -38,10 +42,10 @@ typedef struct {
 #define REQUEST_PAYLOAD_SIZE (sizeof(Request)-sizeof(long))
 #define NO_REQUEST_DATA ((RequestData) 0L)
 
-MessageQueue createMessageQueue(key_t key);
-MessageQueue openMessageQueue(key_t key);
-void removeMessageQueue(MessageQueue id);
-Request waitForMessageQueue(MessageQueue id, Address forAddress);
-void sendViaMessageQueue(MessageQueue id, Request request);
+MessageQueue* createMessageQueue(key_t key);
+MessageQueue* openMessageQueue(key_t key);
+void removeMessageQueue(MessageQueue* id);
+Request* waitForMessageQueue(MessageQueue* id, Address forAddress);
+void sendViaMessageQueue(MessageQueue* id, Request* request);
 
 #endif

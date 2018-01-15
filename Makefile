@@ -1,4 +1,4 @@
-CFLAGS = -Wall
+CFLAGS = -g -Wall
 
 all: chp.o client.o hubert.o
 	gcc chp.o client.o -o client
