@@ -6,12 +6,8 @@
 
 int main() {
   MessageQueue* clientCom = openMessageQueue(CLIENT_COM);
-
-  Request request = {HUBERT_ADDR, NO_ADDR, TALK, NO_REQUEST_DATA};
-  sendViaMessageQueue(clientCom, &request);
-
-  Request* requestP = waitForMessageQueue(clientCom, NO_ADDR);
-  printf("We have no address %d\n", requestP->data.address);
+  Connection* con = initConnection(clientCom);
+  printf("Got address %ld\n", con->this);
 
   return EXIT_SUCCESS;
 }

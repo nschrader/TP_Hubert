@@ -2,7 +2,6 @@
 #define MESSAGE_QUEUE_H
 
 #include <sys/types.h>
-#include "protocol.h"
 #include "entity.h"
 
 #define CLIENT_COM    0xBEEF
@@ -31,12 +30,16 @@ typedef union {
   Order order[MSGMAX/sizeof(Order)];
 } RequestData;
 
+typedef enum {
+  TALK, MENU, ORDER, OK, KO
+} Command;
+
 typedef struct {
   Address destination;
   Address source;
   Command cmd;
   RequestData data;
-} Request;
+} Request __attribute__ ((aligned (8)));
 
 #define REQUEST_PAYLOAD_SIZE (sizeof(Request)-sizeof(long))
 #define NO_REQUEST_DATA ((RequestData) 0L)

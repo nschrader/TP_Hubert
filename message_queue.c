@@ -8,23 +8,10 @@
 #include <errno.h>
 
 #include "message_queue.h"
-#include "hubert.h"
+#include "misc.h"
 
 #define SIGNLETON 1
 #define ONLY_SEMAPHORE 0
-
-#define fatalError(x) _fatalError("[Fatal] " x);
-static void _fatalError(char* errorMessage) {
-  if (errno == EINTR) {
-    // There was a signal so we need to exit, but it's not en error
-    exit(EXIT_SUCCESS);
-  }
-  perror(errorMessage);
-  if (errno == ENOENT) {
-    fprintf(stderr, "Is %s running?\n", HUBERT_NAME);
-  }
-  exit(EXIT_FAILURE);
-}
 
 static MessageQueue* getMessageQueue(key_t key, bool shouldCreate) {
   MessageQueue* queue = malloc(sizeof(MessageQueue));
@@ -47,7 +34,7 @@ static MessageQueue* getMessageQueue(key_t key, bool shouldCreate) {
   cleanSemAndMsg:
   msgctl(queue->semid, ONLY_SEMAPHORE, IPC_RMID);
   error:
-  fatalError("Could not open message queue or semaphore");
+  fatal("Could not open message queue or semaphore");
   free(queue);
   return NULL;
 }
@@ -72,7 +59,7 @@ void removeMessageQueue(MessageQueue* queue) {
 
   error:
   free(queue);
-  fatalError("Could not remove message queue");
+  fatal("Could not remove message queue");
 }
 
 static void operateOnSemaphore(int semid, int val) {
@@ -81,7 +68,7 @@ static void operateOnSemaphore(int semid, int val) {
   operation.sem_op = val;
   operation.sem_flg = IPC_NOFLAGS;
   if (semop(semid, &operation, 1) == ERROR) {
-    fatalError("Could not operate on semaphore");
+    fatal("Could not operate on semaphore");
   }
 }
 
@@ -97,7 +84,7 @@ Request* waitForMessageQueue(MessageQueue* queue, Address forAddress) {
   Request* request = malloc(sizeof(Request));
   if (msgrcv(queue->msqid, request, REQUEST_PAYLOAD_SIZE, forAddress, IPC_NOFLAGS) == ERROR) {
     free(request);
-    fatalError("Cannot read from message queue");
+    fatal("Cannot read from message queue");
   }
   if (forAddress == NO_ADDR) {
     V(queue->semid);
@@ -110,6 +97,6 @@ void sendViaMessageQueue(MessageQueue* queue, Request* request) {
     P(queue->semid);
   }
   if (msgsnd(queue->msqid, request, REQUEST_PAYLOAD_SIZE, IPC_NOFLAGS) == ERROR) {
-    fatalError("Cannot send via message queue");
+    fatal("Cannot send via message queue");
   }
 }

@@ -1,8 +1,14 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
-typedef enum {
-  TALK, MENU, ORDER, OK, KO
-} Command;
+#include "message_queue.h"
+
+typedef struct {
+  MessageQueue *messageQueue;
+  Address this;
+} Connection;
+
+Connection* initConnection(MessageQueue* queue);
+void closeConnection(Connection* con);
 
 #endif
