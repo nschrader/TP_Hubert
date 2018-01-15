@@ -1,5 +1,8 @@
 CFLAGS = -g -Wall
 
-all: chp.o client.o hubert.o
-	gcc chp.o client.o -o client
-	gcc chp.o hubert.o -o hubert
+all: message_queue.o client.o hubert.o message_queue.h protocol.h
+	gcc message_queue.o client.o -o client
+	gcc message_queue.o hubert.o -o hubert
+
+clean:
+	rm -rf *.o client hubert

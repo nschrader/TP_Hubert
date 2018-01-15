@@ -1,10 +1,8 @@
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/msg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "chp.h"
+#include "message_queue.h"
+#include "protocol.h"
 
 int main() {
   MessageQueue* clientCom = openMessageQueue(CLIENT_COM);

@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <errno.h>
 
-#include "chp.h"
+#include "message_queue.h"
 #include "hubert.h"
 
 #define SIGNLETON 1
@@ -64,14 +64,15 @@ void removeMessageQueue(MessageQueue* queue) {
   if (msgctl(queue->msqid, IPC_RMID, NULL) == ERROR) {
     goto error;
   }
-  if (msgctl(queue->semid, ONLY_SEMAPHORE, IPC_RMID) == ERROR) {
+  if (semctl(queue->semid, ONLY_SEMAPHORE, IPC_RMID) == ERROR) {
     goto error;
   }
   free(queue);
   return;
 
   error:
-  fatalError("Could not open message queue");
+  free(queue);
+  fatalError("Could not remove message queue");
 }
 
 static void operateOnSemaphore(int semid, int val) {
@@ -89,7 +90,6 @@ static void V(int semid) {
 }
 
 static void P(int semid) {
-  printf("Before operation: %d\n", semctl(semid, 0, GETVAL));
   operateOnSemaphore(semid, -1);
 }
 

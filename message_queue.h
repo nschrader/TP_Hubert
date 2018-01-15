@@ -1,7 +1,8 @@
-#ifndef CHP_H
-#define CHP_H
+#ifndef MESSAGE_QUEUE_H
+#define MESSAGE_QUEUE_H
 
 #include <sys/types.h>
+#include "protocol.h"
 #include "entity.h"
 
 #define CLIENT_COM    0xBEEF
@@ -11,9 +12,11 @@
 #define FIRST_ADDR    0x0002
 #define HUBERT_ADDR   0xBABE
 
-#define ERROR         -1
 #define IPC_NOFLAGS   0
 #define IPC_ALLWRITE  0666
+
+#define ERROR         -1
+#define MSGMAX        8192 //Let's hope that it's de default value
 
 typedef long Address;
 
@@ -22,14 +25,10 @@ typedef struct {
   int semid;
 } MessageQueue;
 
-typedef enum {
-  TALK, MENU, ORDER, OK, KO
-} Command;
-
 typedef union {
   Address address;
-  Menu menu;
-  Order order;
+  Menu menu[MSGMAX/sizeof(Menu)];
+  Order order[MSGMAX/sizeof(Order)];
 } RequestData;
 
 typedef struct {

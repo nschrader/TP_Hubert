@@ -1,12 +1,10 @@
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/msg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <signal.h>
 
-#include "chp.h"
+#include "message_queue.h"
+#include "protocol.h"
 
 static MessageQueue* clientCom = NULL;
 static Address addressCounter = FIRST_ADDR;
