@@ -25,13 +25,14 @@ typedef struct {
 } MessageQueue;
 
 typedef union {
+  //bool isMaster;
   Address address;
   Menu menu[MSGMAX/sizeof(Menu)];
   Order order[MSGMAX/sizeof(Order)];
 } RequestData;
 
 typedef enum {
-  TALK, MENU, ORDER, OK, KO
+  MASTER, TALK, MENU, ORDER, OK, KO, BYE
 } Command;
 
 typedef struct {
@@ -47,7 +48,8 @@ typedef struct {
 MessageQueue* createMessageQueue(key_t key);
 MessageQueue* openMessageQueue(key_t key);
 void removeMessageQueue(MessageQueue* id);
-Request* waitForMessageQueue(MessageQueue* id, Address forAddress);
+Request* getFromMessageQueue(MessageQueue* queue, Address forAddress);
+Request* waitForMessageQueue(MessageQueue* queue, Address forAddress);
 void sendViaMessageQueue(MessageQueue* id, Request* request);
 
 #endif

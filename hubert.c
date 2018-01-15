@@ -37,18 +37,21 @@ int main() {
   openQueues();
   removeQueuesOnExit();
 
-  recover:
   while (true) {
     Request* requestIn = waitForMessageQueue(clientCom, HUBERT_ADDR);
     switch (requestIn->cmd) {
       case TALK:
         assignNewAddress(clientCom);
         break;
+      case BYE:
+        //removeResto();
+        printf("Somebody said bye\n");
+        break;
       default:
-        warning("Got unkonwn command, dunno what to do..."); 
-        free(requestIn);
-        goto recover;
+        warning("Got unkonwn command, dunno what to do...");
+        break;
     }
+    free(requestIn);
   }
 
   return EXIT_SUCCESS;

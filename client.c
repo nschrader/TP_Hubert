@@ -9,5 +9,7 @@ int main() {
   Connection* con = initConnection(clientCom);
   printf("Got address %ld\n", con->this);
 
+  closeConnection(con);
+
   return EXIT_SUCCESS;
 }

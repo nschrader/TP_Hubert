@@ -80,9 +80,10 @@ static void P(int semid) {
   operateOnSemaphore(semid, -1);
 }
 
-Request* waitForMessageQueue(MessageQueue* queue, Address forAddress) {
+static Request* checkMessageQueue(MessageQueue* queue, Address forAddress, bool shouldWait) {
   Request* request = malloc(sizeof(Request));
-  if (msgrcv(queue->msqid, request, REQUEST_PAYLOAD_SIZE, forAddress, IPC_NOFLAGS) == ERROR) {
+  int flags = shouldWait ? IPC_NOFLAGS : IPC_NOWAIT;
+  if (msgrcv(queue->msqid, request, REQUEST_PAYLOAD_SIZE, forAddress, flags) == ERROR) {
     free(request);
     fatal("Cannot read from message queue");
   }
@@ -90,6 +91,14 @@ Request* waitForMessageQueue(MessageQueue* queue, Address forAddress) {
     V(queue->semid);
   }
   return request;
+}
+
+Request* getFromMessageQueue(MessageQueue* queue, Address forAddress) {
+  return checkMessageQueue(queue, forAddress, false);
+}
+
+Request* waitForMessageQueue(MessageQueue* queue, Address forAddress) {
+  return checkMessageQueue(queue, forAddress, true);
 }
 
 void sendViaMessageQueue(MessageQueue* queue, Request* request) {
