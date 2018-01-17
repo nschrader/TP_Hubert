@@ -5,8 +5,7 @@
 #include "protocol.h"
 
 int main() {
-  MessageQueue* clientCom = openMessageQueue(CLIENT_COM);
-  Connection* con = initConnection(clientCom);
+  Connection* con = initConnection(CLIENT_COM);
   printf("Got address %ld\n", con->this);
 
   Dish* menu = requestMenu(con);

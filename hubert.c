@@ -1,19 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <string.h>
 #include <signal.h>
 
 #include "message_queue.h"
 #include "protocol.h"
 #include "misc.h"
 
-static MessageQueue* clientCom = NULL;
+static Connection* clientCom = NULL;
 static Address addressCounter = FIRST_ADDR;
 
 void removeQueuesHandler() {
   if (clientCom != NULL) {
-    removeMessageQueue(clientCom);
+    shutdownConnection(clientCom);
     clientCom = NULL;
   }
 }
@@ -25,13 +24,13 @@ static void removeQueuesOnExit() {
 }
 
 static void openQueues() {
-  clientCom = createMessageQueue(CLIENT_COM);
+  clientCom = bootstrapConnection(CLIENT_COM);
 }
 
-static void assignNewAddress(MessageQueue* queue) {
+static void assignNewAddress(Connection* con) {
   RequestData data = { .address = addressCounter++ };
-  Request requestOut = {NO_ADDR, HUBERT_ADDR, TALK, data};
-  sendViaMessageQueue(clientCom, &requestOut);
+  Request requestOut = {NO_ADDR, con->this, TALK, data};
+  sendViaMessageQueue(con->messageQueue, &requestOut);
 }
 
 static void checkIfSingleton() {
@@ -46,12 +45,6 @@ static void checkIfSingleton() {
   }
 }
 
-static void notifyOnFallbackAddr(MessageQueue* queue) {
-  RequestData data = { .senderIsMaster = true };
-  Request requestOut = {FALLBACK_ADDR, HUBERT_ADDR, MASTER, data};
-  sendViaMessageQueue(queue, &requestOut);
-}
-
 static void getMenu() {
   Dish menu[4] = {
     { .name = "TexMex", .price = 149 },
@@ -59,10 +52,7 @@ static void getMenu() {
     { .name = "Kebab", .price = 279},
     { 0 }
   };
-  RequestData data;
-  memcpy(&data, menu, sizeof(menu));
-  Request request = {2, HUBERT_ADDR, MENU, data};
-  sendViaMessageQueue(clientCom, &request);
+  sendMenu(clientCom, menu, 2);
 }
 
 int main() {
@@ -71,11 +61,11 @@ int main() {
   removeQueuesOnExit();
 
   while (true) {
-    Request* requestIn = waitForMessageQueue(clientCom, HUBERT_ADDR);
+    Request* requestIn = waitForMessageQueue(clientCom->messageQueue, HUBERT_ADDR);
     switch (requestIn->cmd) {
       case MASTER:
         printf("Notifying\n");
-        notifyOnFallbackAddr(clientCom);
+        sendMaster(clientCom);
       case TALK:
         assignNewAddress(clientCom);
         break;

@@ -1,12 +1,21 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "protocol.h"
 #include "message_queue.h"
 #include "entity.h"
 
-Connection* initConnection(MessageQueue* queue) {
+Connection* bootstrapConnection(key_t key) {
+  Connection* con = malloc(sizeof(Connection));
+  con->messageQueue = createMessageQueue(key);
+  con->this = HUBERT_ADDR;
+  return con;
+}
+
+Connection* initConnection(key_t key) {
+  MessageQueue* queue = openMessageQueue(key);
   Request requestOut = {HUBERT_ADDR, NO_ADDR, TALK, NO_REQUEST_DATA};
   sendViaMessageQueue(queue, &requestOut);
 
@@ -30,19 +39,25 @@ static bool isThisInstanceMaster(Request* answer) {
   }
 }
 
-bool requestMaster(MessageQueue *queue) {
+bool requestMaster(Connection *con) {
   RequestData data = { .senderIsMaster = false };
   Request request = {HUBERT_ADDR, FALLBACK_ADDR, MASTER, data};
-  sendViaMessageQueue(queue, &request);
+  sendViaMessageQueue(con->messageQueue, &request);
   usleep(500);
-  Request* requestAnswer = getFromMessageQueue(queue, FALLBACK_ADDR);
+  Request* requestAnswer = getFromMessageQueue(con->messageQueue, FALLBACK_ADDR);
   if (isThisInstanceMaster(requestAnswer)) {
-    while(getFromMessageQueue(queue, HUBERT_ADDR) != NULL);
-    while(getFromMessageQueue(queue, FALLBACK_ADDR) != NULL);
+    while(getFromMessageQueue(con->messageQueue, HUBERT_ADDR) != NULL);
+    while(getFromMessageQueue(con->messageQueue, FALLBACK_ADDR) != NULL);
     return true;
   } else {
     return false;
   }
+}
+
+void sendMaster(Connection* con) {
+  RequestData data = { .senderIsMaster = true };
+  Request requestOut = {FALLBACK_ADDR, con->this, MASTER, data};
+  sendViaMessageQueue(con->messageQueue, &requestOut);
 }
 
 Dish* requestMenu(Connection* con) {
@@ -53,9 +68,21 @@ Dish* requestMenu(Connection* con) {
   return requestIn->data.menu;
 }
 
+void sendMenu(Connection* con, Dish* menu, Address forAddress) {
+  RequestData data;
+  memcpy(&data, menu, sizeof(Menu) * countDishes(menu));
+  Request request = {forAddress, con->this, MENU, data};
+  sendViaMessageQueue(con->messageQueue, &request);
+}
+
 void closeConnection(Connection* con) {
   Request requestOut = {HUBERT_ADDR, con->this, BYE, NO_REQUEST_DATA};
   sendViaMessageQueue(con->messageQueue, &requestOut);
   free(con->messageQueue);
+  free(con);
+}
+
+void shutdownConnection(Connection* con) {
+  removeMessageQueue(con->messageQueue);
   free(con);
 }

@@ -1,6 +1,8 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
+#include <stddef.h>
+
 struct _Menu;
 struct _Restaurant;
 struct _Dish;
@@ -35,5 +37,7 @@ typedef struct _User {
   int id;
   char* name;
 } User;
+
+size_t countDishes(Dish* dishes);
 
 #endif

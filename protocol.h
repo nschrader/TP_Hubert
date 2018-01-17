@@ -9,9 +9,13 @@ typedef struct {
   Address this;
 } Connection;
 
-Connection* initConnection(MessageQueue* queue);
-bool requestMaster(MessageQueue *queue);
+Connection* initConnection(key_t key);
+Connection* bootstrapConnection(key_t key);
+bool requestMaster(Connection* queue);
+void sendMaster(Connection* con);
 Dish* requestMenu(Connection* con);
+void sendMenu(Connection* con, Dish* menu, Address forAddress);
 void closeConnection(Connection* con);
+void shutdownConnection(Connection* con);
 
 #endif

@@ -9,6 +9,7 @@
 
 #include "message_queue.h"
 #include "misc.h"
+#include "entity.h"
 
 #define SIGNLETON 1
 #define ONLY_SEMAPHORE 0
@@ -106,19 +107,13 @@ Request* waitForMessageQueue(MessageQueue* queue, Address forAddress) {
   return checkMessageQueue(queue, forAddress, true);
 }
 
-static size_t countDishes(Dish* dishes) {
-  size_t s;
-  for(s = 0; *((int*) dishes) != 0; s++, dishes++);
-  return ++s;
-}
-
 size_t getPayloadSizeFrom(Request* request) {
   switch (request->cmd) {
     case MASTER: return REQUEST_PAYLOAD(bool, 1);
     case TALK: return REQUEST_PAYLOAD(Address, 1);
     case MENU: return REQUEST_PAYLOAD(Dish, countDishes(request->data.menu));
     case BYE: return REQUEST_NO_PAYLOAD;
-    default: fatal("Not implemented command");
+    default: fatal("Unknown command");
   }
   return 0;
 }
