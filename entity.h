@@ -21,10 +21,8 @@ typedef struct _Restaurant {
 } Restaurant;
 
 typedef struct _Dish {
-  int id;
-  char* name;
+  char name[10];
   int price; //cents
-  int quantity;
 } Dish;
 
 typedef struct _Order {

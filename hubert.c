@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <signal.h>
 
 #include "message_queue.h"
@@ -51,6 +52,19 @@ static void notifyOnFallbackAddr(MessageQueue* queue) {
   sendViaMessageQueue(queue, &requestOut);
 }
 
+static void getMenu() {
+  Dish menu[4] = {
+    { .name = "TexMex", .price = 149 },
+    { .name = "Burger", .price = 369},
+    { .name = "Kebab", .price = 279},
+    { 0 }
+  };
+  RequestData data;
+  memcpy(&data, menu, sizeof(menu));
+  Request request = {2, HUBERT_ADDR, MENU, data};
+  sendViaMessageQueue(clientCom, &request);
+}
+
 int main() {
   openQueues();
   checkIfSingleton();
@@ -64,6 +78,10 @@ int main() {
         notifyOnFallbackAddr(clientCom);
       case TALK:
         assignNewAddress(clientCom);
+        break;
+      case MENU:
+        printf("Looking for menu\n");
+        getMenu();
         break;
       case BYE:
         //removeResto();

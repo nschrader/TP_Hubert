@@ -30,8 +30,7 @@ typedef struct {
 typedef union {
   bool senderIsMaster;
   Address address;
-  Menu menu[MSGMAX/sizeof(Menu)];
-  Order order[MSGMAX/sizeof(Order)];
+  Dish menu[MSGMAX/sizeof(Dish)];
 } RequestData;
 
 typedef enum {
@@ -47,12 +46,12 @@ typedef struct __attribute__((__packed__)) {
 
 #define REQUEST_CAPACITY (sizeof(Request)-sizeof(Address))
 #define REQUEST_NO_PAYLOAD (sizeof(Address)+sizeof(Command))
-#define REQUEST_PAYLOAD(x) (REQUEST_NO_PAYLOAD+sizeof(x))
+#define REQUEST_PAYLOAD(x, n) (REQUEST_NO_PAYLOAD+sizeof(x)*n)
 #define NO_REQUEST_DATA ((RequestData) 0L)
 
 MessageQueue* createMessageQueue(key_t key);
 MessageQueue* openMessageQueue(key_t key);
-size_t getPayloadSizeFromCommand(Command cmd);
+size_t getPayloadSizeFrom(Request* request);
 Request* getFromMessageQueue(MessageQueue* queue, Address forAddress);
 Request* waitForMessageQueue(MessageQueue* queue, Address forAddress);
 void sendViaMessageQueue(MessageQueue* id, Request* request);

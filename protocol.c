@@ -4,6 +4,7 @@
 
 #include "protocol.h"
 #include "message_queue.h"
+#include "entity.h"
 
 Connection* initConnection(MessageQueue* queue) {
   Request requestOut = {HUBERT_ADDR, NO_ADDR, TALK, NO_REQUEST_DATA};
@@ -42,6 +43,14 @@ bool requestMaster(MessageQueue *queue) {
   } else {
     return false;
   }
+}
+
+Dish* requestMenu(Connection* con) {
+  Request requestOut = {HUBERT_ADDR, con->this, MENU, NO_REQUEST_DATA};
+  sendViaMessageQueue(con->messageQueue, &requestOut);
+
+  Request* requestIn = waitForMessageQueue(con->messageQueue, con->this);
+  return requestIn->data.menu;
 }
 
 void closeConnection(Connection* con) {

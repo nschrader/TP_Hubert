@@ -106,10 +106,17 @@ Request* waitForMessageQueue(MessageQueue* queue, Address forAddress) {
   return checkMessageQueue(queue, forAddress, true);
 }
 
-size_t getPayloadSizeFromCommand(Command cmd) {
-  switch (cmd) {
-    case MASTER: return REQUEST_PAYLOAD(bool);
-    case TALK: return REQUEST_PAYLOAD(Address);
+static size_t countDishes(Dish* dishes) {
+  size_t s;
+  for(s = 0; *((int*) dishes) != 0; s++, dishes++);
+  return ++s;
+}
+
+size_t getPayloadSizeFrom(Request* request) {
+  switch (request->cmd) {
+    case MASTER: return REQUEST_PAYLOAD(bool, 1);
+    case TALK: return REQUEST_PAYLOAD(Address, 1);
+    case MENU: return REQUEST_PAYLOAD(Dish, countDishes(request->data.menu));
     case BYE: return REQUEST_NO_PAYLOAD;
     default: fatal("Not implemented command");
   }
@@ -120,7 +127,7 @@ void sendViaMessageQueue(MessageQueue* queue, Request* request) {
   if (request->source == NO_ADDR) {
     P(queue->semid);
   }
-  size_t payload = getPayloadSizeFromCommand(request->cmd);
+  size_t payload = getPayloadSizeFrom(request);
   if (msgsnd(queue->msqid, request, payload, IPC_NOFLAGS) == ERROR) {
     fatal("Cannot send via message queue");
   }
