@@ -20,9 +20,6 @@
 #define NO_ERRNO      0
 #define MSGMAX        8192 //Let's hope that it's the POSIX default value
 
-#define GCC_MAKE_AT_LEAST_MSGMAX \
-  __attribute__ ((aligned (MSGMAX)))
-
 typedef long Address;
 
 typedef struct {
@@ -41,21 +38,24 @@ typedef enum {
   MASTER, TALK, MENU, ORDER, OK, KO, BYE
 } Command;
 
-typedef struct {
+typedef struct __attribute__((__packed__)) {
   Address destination;
   Address source;
   Command cmd;
   RequestData data;
-} Request GCC_MAKE_AT_LEAST_MSGMAX;
+} Request;
 
-#define REQUEST_PAYLOAD_SIZE (sizeof(Request)-sizeof(long))
+#define REQUEST_CAPACITY (sizeof(Request)-sizeof(Address))
+#define REQUEST_NO_PAYLOAD (sizeof(Address)+sizeof(Command))
+#define REQUEST_PAYLOAD(x) (REQUEST_NO_PAYLOAD+sizeof(x))
 #define NO_REQUEST_DATA ((RequestData) 0L)
 
 MessageQueue* createMessageQueue(key_t key);
 MessageQueue* openMessageQueue(key_t key);
-void removeMessageQueue(MessageQueue* id);
+size_t getPayloadSizeFromCommand(Command cmd);
 Request* getFromMessageQueue(MessageQueue* queue, Address forAddress);
 Request* waitForMessageQueue(MessageQueue* queue, Address forAddress);
 void sendViaMessageQueue(MessageQueue* id, Request* request);
+void removeMessageQueue(MessageQueue* id);
 
 #endif

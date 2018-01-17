@@ -57,7 +57,6 @@ int main() {
   removeQueuesOnExit();
 
   while (true) {
-    printf("Looping");
     Request* requestIn = waitForMessageQueue(clientCom, HUBERT_ADDR);
     switch (requestIn->cmd) {
       case MASTER:

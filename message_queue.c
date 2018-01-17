@@ -83,7 +83,7 @@ static void P(int semid) {
 static Request* checkMessageQueue(MessageQueue* queue, Address forAddress, bool shouldWait) {
   Request* request = malloc(sizeof(Request));
   int flags = shouldWait ? IPC_NOFLAGS : IPC_NOWAIT;
-  if (msgrcv(queue->msqid, request, REQUEST_PAYLOAD_SIZE, forAddress, flags) == ERROR) {
+  if (msgrcv(queue->msqid, request, REQUEST_CAPACITY, forAddress, flags) == ERROR) {
     free(request);
     if (errno == ENOMSG && !shouldWait) {
       errno = NO_ERRNO;
@@ -106,11 +106,22 @@ Request* waitForMessageQueue(MessageQueue* queue, Address forAddress) {
   return checkMessageQueue(queue, forAddress, true);
 }
 
+size_t getPayloadSizeFromCommand(Command cmd) {
+  switch (cmd) {
+    case MASTER: return REQUEST_PAYLOAD(bool);
+    case TALK: return REQUEST_PAYLOAD(Address);
+    case BYE: return REQUEST_NO_PAYLOAD;
+    default: fatal("Not implemented command");
+  }
+  return 0;
+}
+
 void sendViaMessageQueue(MessageQueue* queue, Request* request) {
   if (request->source == NO_ADDR) {
     P(queue->semid);
   }
-  if (msgsnd(queue->msqid, request, REQUEST_PAYLOAD_SIZE, IPC_NOFLAGS) == ERROR) {
+  size_t payload = getPayloadSizeFromCommand(request->cmd);
+  if (msgsnd(queue->msqid, request, payload, IPC_NOFLAGS) == ERROR) {
     fatal("Cannot send via message queue");
   }
 }
