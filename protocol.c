@@ -18,33 +18,30 @@ Connection* initConnection(MessageQueue* queue) {
   return con;
 }
 
+static bool isThisInstanceMaster(Request* answer) {
+  if (answer == NULL) {
+    return true;
+  } else {
+    bool interceptedMasterCmd = (answer->cmd == MASTER);
+    bool senderWasMaster = answer->data.senderIsMaster;
+    free(answer);
+    return interceptedMasterCmd && !senderWasMaster;
+  }
+}
+
 bool requestMaster(MessageQueue *queue) {
   RequestData data = { .senderIsMaster = false };
   Request request = {HUBERT_ADDR, FALLBACK_ADDR, MASTER, data};
   sendViaMessageQueue(queue, &request);
   usleep(500);
   Request* requestAnswer = getFromMessageQueue(queue, FALLBACK_ADDR);
-  if (requestAnswer == NULL) {
-    goto isMaster;
+  if (isThisInstanceMaster(requestAnswer)) {
+    while(getFromMessageQueue(queue, HUBERT_ADDR) != NULL);
+    while(getFromMessageQueue(queue, FALLBACK_ADDR) != NULL);
+    return true;
   } else {
-    bool interceptedMasterCmd = (requestAnswer->cmd == MASTER);
-    bool senderWasMaster = requestAnswer->data.senderIsMaster;
-    bool thisInstanceIsMaster = interceptedMasterCmd && !senderWasMaster;
-    free(requestAnswer);
-    if (thisInstanceIsMaster) {
-      goto isMaster;
-    } else {
-      goto isntMaster;
-    }
+    return false;
   }
-
-  isMaster:
-  while(getFromMessageQueue(queue, HUBERT_ADDR) != NULL);
-  while(getFromMessageQueue(queue, FALLBACK_ADDR) != NULL);
-  return true;
-
-  isntMaster:
-  return false;
 }
 
 void closeConnection(Connection* con) {
