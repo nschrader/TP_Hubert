@@ -33,13 +33,36 @@ static void assignNewAddress(MessageQueue* queue) {
   sendViaMessageQueue(clientCom, &requestOut);
 }
 
+static void checkIfSingleton() {
+  bool isClientComMaster = requestMaster(clientCom);
+  bool isRestoComMaster = true;
+  if(!isClientComMaster || !isRestoComMaster) {
+    free(clientCom);
+    clientCom = NULL;
+    //free(restoCom);
+    //restCom = NULL;
+    fatal("Another instance seems to be running!");
+  }
+}
+
+static void notifyOnFallbackAddr(MessageQueue* queue) {
+  RequestData data = { .senderIsMaster = true };
+  Request requestOut = {FALLBACK_ADDR, HUBERT_ADDR, MASTER, data};
+  sendViaMessageQueue(queue, &requestOut);
+}
+
 int main() {
   openQueues();
+  checkIfSingleton();
   removeQueuesOnExit();
 
   while (true) {
+    printf("Looping");
     Request* requestIn = waitForMessageQueue(clientCom, HUBERT_ADDR);
     switch (requestIn->cmd) {
+      case MASTER:
+        printf("Notifying\n");
+        notifyOnFallbackAddr(clientCom);
       case TALK:
         assignNewAddress(clientCom);
         break;

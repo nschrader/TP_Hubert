@@ -9,6 +9,7 @@ typedef struct {
 } Connection;
 
 Connection* initConnection(MessageQueue* queue);
+bool requestMaster(MessageQueue *queue);
 void closeConnection(Connection* con);
 
 #endif

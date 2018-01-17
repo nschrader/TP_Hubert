@@ -85,7 +85,12 @@ static Request* checkMessageQueue(MessageQueue* queue, Address forAddress, bool 
   int flags = shouldWait ? IPC_NOFLAGS : IPC_NOWAIT;
   if (msgrcv(queue->msqid, request, REQUEST_PAYLOAD_SIZE, forAddress, flags) == ERROR) {
     free(request);
-    fatal("Cannot read from message queue");
+    if (errno == ENOMSG && !shouldWait) {
+      errno = NO_ERRNO;
+      return NULL;
+    } else {
+      fatal("Cannot read from message queue");
+    }
   }
   if (forAddress == NO_ADDR) {
     V(queue->semid);

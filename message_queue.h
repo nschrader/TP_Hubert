@@ -2,6 +2,7 @@
 #define MESSAGE_QUEUE_H
 
 #include <sys/types.h>
+#include <stdbool.h>
 #include "entity.h"
 
 #define CLIENT_COM    0xBEEF
@@ -10,12 +11,17 @@
 #define NO_ADDR       0x0001
 #define FIRST_ADDR    0x0002
 #define HUBERT_ADDR   0xBABE
+#define FALLBACK_ADDR 0xDEAD
 
 #define IPC_NOFLAGS   0
 #define IPC_ALLWRITE  0666
 
 #define ERROR         -1
-#define MSGMAX        8192 //Let's hope that it's de default value
+#define NO_ERRNO      0
+#define MSGMAX        8192 //Let's hope that it's the POSIX default value
+
+#define GCC_MAKE_AT_LEAST_MSGMAX \
+  __attribute__ ((aligned (MSGMAX)))
 
 typedef long Address;
 
@@ -25,7 +31,7 @@ typedef struct {
 } MessageQueue;
 
 typedef union {
-  //bool isMaster;
+  bool senderIsMaster;
   Address address;
   Menu menu[MSGMAX/sizeof(Menu)];
   Order order[MSGMAX/sizeof(Order)];
@@ -40,7 +46,7 @@ typedef struct {
   Address source;
   Command cmd;
   RequestData data;
-} Request __attribute__ ((aligned (8)));
+} Request GCC_MAKE_AT_LEAST_MSGMAX;
 
 #define REQUEST_PAYLOAD_SIZE (sizeof(Request)-sizeof(long))
 #define NO_REQUEST_DATA ((RequestData) 0L)

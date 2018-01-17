@@ -15,10 +15,10 @@ void _fatal(char* errorMessage) {
     if (errno == ENOENT) {
       fprintf(stderr, "Is %s running?\n", HUBERT_NAME);
     }
-    exit(EXIT_FAILURE);
   } else {
     fprintf(stderr, "%s\n", errorMessage);
   }
+  exit(EXIT_FAILURE);
 }
 
 void _warning(char* errorMessage) {

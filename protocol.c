@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <stdbool.h>
+#include <unistd.h>
 
 #include "protocol.h"
 #include "message_queue.h"
@@ -16,14 +18,34 @@ Connection* initConnection(MessageQueue* queue) {
   return con;
 }
 
-/*void requestMaster(MessageQueue *queue) {
-  RequestData data = { .isMaster = false };
+bool requestMaster(MessageQueue *queue) {
+  RequestData data = { .senderIsMaster = false };
   Request request = {HUBERT_ADDR, FALLBACK_ADDR, MASTER, data};
-  sendViaMessageQueue(queue. &request);
+  sendViaMessageQueue(queue, &request);
   usleep(500);
-  Request requestAnswer = getFromMessageQueue(queue, FALLBACK_ADDR);
-  if answer
-}*/
+  Request* requestAnswer = getFromMessageQueue(queue, FALLBACK_ADDR);
+  if (requestAnswer == NULL) {
+    goto isMaster;
+  } else {
+    bool interceptedMasterCmd = (requestAnswer->cmd == MASTER);
+    bool senderWasMaster = requestAnswer->data.senderIsMaster;
+    bool thisInstanceIsMaster = interceptedMasterCmd && !senderWasMaster;
+    free(requestAnswer);
+    if (thisInstanceIsMaster) {
+      goto isMaster;
+    } else {
+      goto isntMaster;
+    }
+  }
+
+  isMaster:
+  while(getFromMessageQueue(queue, HUBERT_ADDR) != NULL);
+  while(getFromMessageQueue(queue, FALLBACK_ADDR) != NULL);
+  return true;
+
+  isntMaster:
+  return false;
+}
 
 void closeConnection(Connection* con) {
   Request requestOut = {HUBERT_ADDR, con->this, BYE, NO_REQUEST_DATA};
