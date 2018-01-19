@@ -24,6 +24,20 @@ static bool isIdInMenu(Dish* menu, int id) {
   return false;
 }
 
+static bool evaluateLine(Dish* menu, char* line, int* order) {
+  int id = atol(line);
+  if (id == 0) {
+    printf("Invalid number, try again: ");
+    return false;
+  } else if (!isIdInMenu(menu, id)) {
+    printf("No such order code, try again: ");
+    return false;
+  } else {
+    *order = id;
+  }
+  return true;
+}
+
 static RequestData readOrder(Dish* menu) {
   char* line = NULL;
   size_t lineN = 0;
@@ -38,18 +52,9 @@ static RequestData readOrder(Dish* menu) {
     if (*line == '\n') {
       goto clean;
     }
-
-    int id = atol(line);
-    if (id == 0) {
-      printf("Invalid number, try again: ");
+    if (!evaluateLine(menu, line, &data.order[idx])) {
       idx--;
       continue;
-    } else if (!isIdInMenu(menu, id)) {
-      printf("No such order code, try again: ");
-      idx--;
-      continue;
-    } else {
-      data.order[idx] = id;
     }
   }
 
