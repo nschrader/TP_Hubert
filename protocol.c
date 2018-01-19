@@ -70,7 +70,7 @@ Dish* requestMenu(Connection* con) {
 
 void sendMenu(Connection* con, Dish* menu, Address forAddress) {
   RequestData data;
-  memcpy(&data, menu, sizeof(Menu) * countDishes(menu));
+  memcpy(&data, menu, sizeof(Dish) * countDishes(menu));
   Request request = {forAddress, con->this, MENU, data};
   sendViaMessageQueue(con->messageQueue, &request);
 }

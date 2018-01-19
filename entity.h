@@ -3,7 +3,9 @@
 
 #include <stddef.h>
 
-struct _Menu;
+#define NAME_BUFFER 10
+
+/*struct _Menu;
 struct _Restaurant;
 struct _Dish;
 struct _Order;
@@ -20,14 +22,17 @@ typedef struct _Restaurant {
   char* name;
   struct _Dish* stock;
   int stockN;
-} Restaurant;
+} Restaurant;*/
 
-typedef struct _Dish {
-  char name[10];
+typedef struct {
+  int id;
+  char name[NAME_BUFFER];
   int price; //cents
 } Dish;
 
-typedef struct _Order {
+#define IS_END_OF_DISHES(x) (*((int*) x) == 0)
+
+/*typedef struct _Order {
   struct _User* client;
   struct _Dish* dishes;
   int dishesN;
@@ -36,7 +41,7 @@ typedef struct _Order {
 typedef struct _User {
   int id;
   char* name;
-} User;
+} User;*/
 
 size_t countDishes(Dish* dishes);
 

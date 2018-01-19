@@ -45,14 +45,14 @@ static void checkIfSingleton() {
   }
 }
 
-static void getMenu() {
+static void getMenu(Address source) {
   Dish menu[4] = {
-    { .name = "TexMex", .price = 149 },
-    { .name = "Burger", .price = 369},
-    { .name = "Kebab", .price = 279},
+    { .id = 581, .name = "TexMex", .price = 149 },
+    { .id = 582, .name = "Burger", .price = 369},
+    { .id = 583, .name = "Kebab", .price = 279},
     { 0 }
   };
-  sendMenu(clientCom, menu, 2);
+  sendMenu(clientCom, menu, source);
 }
 
 int main() {
@@ -71,10 +71,9 @@ int main() {
         break;
       case MENU:
         printf("Looking for menu\n");
-        getMenu();
+        getMenu(requestIn->source);
         break;
       case BYE:
-        //removeResto();
         printf("Somebody said bye\n");
         break;
       default:
