@@ -11,7 +11,7 @@
 #include "misc.h"
 #include "entity.h"
 
-#define SIGNLETON 1
+#define SINGLETON 1
 #define ONLY_SEMAPHORE 0
 
 static MessageQueue* getMessageQueue(key_t key, bool shouldCreate) {
@@ -21,7 +21,7 @@ static MessageQueue* getMessageQueue(key_t key, bool shouldCreate) {
   if (queue->msqid == ERROR) {
     goto error;
   }
-  queue->semid = semget(key, SIGNLETON, flags);
+  queue->semid = semget(key, SINGLETON, flags);
   if (queue->semid == ERROR) {
     goto cleanMsg;
   }
