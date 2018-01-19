@@ -3,41 +3,19 @@
 
 #include <stddef.h>
 
-struct _Menu;
-struct _Restaurant;
-struct _Dish;
-struct _Order;
-struct _User;
+#define NAME_BUFFER 10
 
-typedef struct _Menu {
-  struct _User* client;
-  struct _Dish* offer;
-  int offerN;
-} Menu;
-
-typedef struct _Restaurant {
+typedef struct {
   int id;
-  char* name;
-  struct _Dish* stock;
-  int stockN;
-} Restaurant;
-
-typedef struct _Dish {
-  char name[10];
+  char name[NAME_BUFFER];
   int price; //cents
 } Dish;
+#define IS_END_OF_DISHES(x) (*((int*) x) == 0)
 
-typedef struct _Order {
-  struct _User* client;
-  struct _Dish* dishes;
-  int dishesN;
-} Order;
-
-typedef struct _User {
-  int id;
-  char* name;
-} User;
+typedef int Order;
+#define IS_END_OF_ORDERS(x) (*x == 0)
 
 size_t countDishes(Dish* dishes);
+size_t countOrders(Order* orders);
 
 #endif

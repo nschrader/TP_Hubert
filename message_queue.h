@@ -3,7 +3,9 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+
 #include "entity.h"
+#include "carrier.h"
 
 #define CLIENT_COM    0xBEEF
 #define RESTORANT_COM 0xCAFE
@@ -20,24 +22,32 @@
 #define NO_ERRNO      0
 #define MSGMAX        8192 //Let's hope that it's the POSIX default value
 
-typedef long Address;
+#define GCC_ATTRIBUTE_PACKED __attribute__((__packed__))
 
 typedef struct {
   int msqid;
   int semid;
 } MessageQueue;
 
-typedef union {
-  bool senderIsMaster;
-  Address address;
-  Dish menu[MSGMAX/sizeof(Dish)];
-} RequestData;
+typedef long Address;
 
 typedef enum {
   MASTER, TALK, MENU, ORDER, OK, KO, BYE
 } Command;
 
-typedef struct __attribute__((__packed__)) {
+#define REQUEST_NO_PAYLOAD (sizeof(Address)+sizeof(Command))
+#define REQUEST_DATA_N_MENUS ((MSGMAX-REQUEST_NO_PAYLOAD)/sizeof(Dish))
+#define REQUEST_DATA_N_ORDERS  ((MSGMAX-REQUEST_NO_PAYLOAD)/sizeof(int))
+
+typedef union {
+  bool senderIsMaster;
+  Address address;
+  Carrier carrier;
+  Dish menu[REQUEST_DATA_N_MENUS];
+  Order order[REQUEST_DATA_N_ORDERS];
+} RequestData;
+
+typedef struct GCC_ATTRIBUTE_PACKED {
   Address destination;
   Address source;
   Command cmd;
@@ -45,7 +55,6 @@ typedef struct __attribute__((__packed__)) {
 } Request;
 
 #define REQUEST_CAPACITY (sizeof(Request)-sizeof(Address))
-#define REQUEST_NO_PAYLOAD (sizeof(Address)+sizeof(Command))
 #define REQUEST_PAYLOAD(x, n) (REQUEST_NO_PAYLOAD+sizeof(x)*n)
 #define NO_REQUEST_DATA ((RequestData) 0L)
 
