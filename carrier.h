@@ -5,4 +5,9 @@
 
 typedef int Carrier;
 
+int initCarrier();
+void carrierRide(float time);
+void requestCarrier(Carrier carrier);
+int isCarrierFree();
+
 #endif

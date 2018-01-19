@@ -28,3 +28,21 @@ void _warning(char* errorMessage) {
     fprintf(stderr, "%s\n", errorMessage);
   }
 }
+
+void operateOnSemaphore(int semid, int val) {
+  struct sembuf operation;
+  operation.sem_num = ONLY_SEMAPHORE;
+  operation.sem_op = val;
+  operation.sem_flg = IPC_NOFLAGS;
+  if (semop(semid, &operation, 1) == ERROR) {
+    fatal("Could not operate on semaphore");
+  }
+}
+
+void V(int semid) {
+  operateOnSemaphore(semid, 1);
+}
+
+void P(int semid) {
+  operateOnSemaphore(semid, -1);
+}
