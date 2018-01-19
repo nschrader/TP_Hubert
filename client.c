@@ -14,7 +14,7 @@ static void printMenu(Dish* menu) {
   }
 }
 
-static bool isIdInMenu(Dish* menu, int id) {
+static bool isIdInMenu(Dish* menu, Order id) {
   while (!IS_END_OF_DISHES(menu)) {
     if (menu->id == id) {
       return true;
@@ -24,8 +24,8 @@ static bool isIdInMenu(Dish* menu, int id) {
   return false;
 }
 
-static bool evaluateLine(Dish* menu, char* line, int* order) {
-  int id = atol(line);
+static bool evaluateLine(Dish* menu, char* line, Order* order) {
+  Order id = atol(line);
   if (id == 0) {
     printf("Invalid number, try again: ");
     return false;
@@ -38,10 +38,10 @@ static bool evaluateLine(Dish* menu, char* line, int* order) {
   return true;
 }
 
-static RequestData readOrder(Dish* menu) {
+static Order* readOrder(Dish* menu) {
   char* line = NULL;
   size_t lineN = 0;
-  RequestData data;
+  static Order order[REQUEST_DATA_N_ORDERS];
 
   printf("\nType order codes for home delivery. Press return to enter the next one.\n");
   printf("Press return on a blank line to finish:\n");
@@ -52,16 +52,16 @@ static RequestData readOrder(Dish* menu) {
     if (*line == '\n') {
       goto clean;
     }
-    if (!evaluateLine(menu, line, &data.order[idx])) {
+    if (!evaluateLine(menu, line, &order[idx])) {
       idx--;
       continue;
     }
   }
 
   clean:
-  data.order[++idx] = 0;
+  order[++idx] = 0;
   free(line);
-  return data;
+  return order;
 }
 
 int main() {
@@ -70,9 +70,9 @@ int main() {
 
   Dish* menu = requestMenu(con);
   printMenu(menu);
-  RequestData data = readOrder(menu);
-  printf("%d, %d, %d\n", data.order[0], data.order[1], data.order[3]);
-  //requestOrder(data);
+  Order* order = readOrder(menu);
+  printf("%d, %d, %d\n", order[0], order[1], order[3]);
+  requestOrder(con, order);
 
   closeConnection(con);
   return EXIT_SUCCESS;

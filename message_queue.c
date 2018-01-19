@@ -112,6 +112,7 @@ size_t getPayloadSizeFrom(Request* request) {
     case MASTER: return REQUEST_PAYLOAD(bool, 1);
     case TALK: return REQUEST_PAYLOAD(Address, 1);
     case MENU: return REQUEST_PAYLOAD(Dish, countDishes(request->data.menu));
+    case ORDER: return REQUEST_PAYLOAD(Order, countOrders(request->data.order));
     case BYE: return REQUEST_NO_PAYLOAD;
     default: fatal("Unknown command");
   }

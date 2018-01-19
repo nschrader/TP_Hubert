@@ -15,6 +15,7 @@ bool requestMaster(Connection* queue);
 void sendMaster(Connection* con);
 Dish* requestMenu(Connection* con);
 void sendMenu(Connection* con, Dish* menu, Address forAddress);
+void requestOrder(Connection* con, Order* orders);
 void closeConnection(Connection* con);
 void shutdownConnection(Connection* con);
 

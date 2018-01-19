@@ -75,6 +75,13 @@ void sendMenu(Connection* con, Dish* menu, Address forAddress) {
   sendViaMessageQueue(con->messageQueue, &request);
 }
 
+void requestOrder(Connection* con, Order* orders) {
+  RequestData data;
+  memcpy(&data, orders, sizeof(int) * countOrders(orders));
+  Request request = {HUBERT_ADDR, con->this, ORDER, data};
+  sendViaMessageQueue(con->messageQueue, &request);
+}
+
 void closeConnection(Connection* con) {
   Request requestOut = {HUBERT_ADDR, con->this, BYE, NO_REQUEST_DATA};
   sendViaMessageQueue(con->messageQueue, &requestOut);

@@ -41,7 +41,7 @@ typedef union {
   bool senderIsMaster;
   Address address;
   Dish menu[REQUEST_DATA_N_MENUS];
-  int order[REQUEST_DATA_N_ORDERS];
+  Order order[REQUEST_DATA_N_ORDERS];
 } RequestData;
 
 typedef struct GCC_ATTRIBUTE_PACKED {
