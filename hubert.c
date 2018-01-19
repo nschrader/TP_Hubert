@@ -27,10 +27,10 @@ static void openQueues() {
   clientCom = bootstrapConnection(CLIENT_COM);
 }
 
-static void assignNewAddress(Connection* con) {
+static void assignNewAddress() {
   RequestData data = { .address = addressCounter++ };
-  Request requestOut = {NO_ADDR, con->this, TALK, data};
-  sendViaMessageQueue(con->messageQueue, &requestOut);
+  Request requestOut = {NO_ADDR, HUBERT_ADDR, TALK, data};
+  sendViaMessageQueue(clientCom->messageQueue, &requestOut);
 }
 
 static void checkIfSingleton() {
@@ -55,6 +55,14 @@ static void getMenu(Address source) {
   sendMenu(clientCom, menu, source);
 }
 
+static void handleOrder(Request* request) {
+  Order* order = request->data.order;
+  printf("%d, %d, %d\n", order[0], order[1], order[3]);
+  //do stuff with order
+  //get carrier
+  sendOrder(clientCom, 1, request->source);
+}
+
 int main() {
   openQueues();
   checkIfSingleton();
@@ -64,17 +72,18 @@ int main() {
     Request* requestIn = waitForMessageQueue(clientCom->messageQueue, HUBERT_ADDR);
     switch (requestIn->cmd) {
       case MASTER:
-        printf("Notifying\n");
         sendMaster(clientCom);
       case TALK:
-        assignNewAddress(clientCom);
+        assignNewAddress();
         break;
       case MENU:
-        printf("Looking for menu\n");
         getMenu(requestIn->source);
         break;
+      case ORDER:
+        printf("Recieving order\n");
+        handleOrder(requestIn);
+        break;
       case BYE:
-        printf("Somebody said bye\n");
         break;
       default:
         warning("Got unkonwn command, dunno what to do...");

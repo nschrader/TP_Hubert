@@ -75,10 +75,19 @@ void sendMenu(Connection* con, Dish* menu, Address forAddress) {
   sendViaMessageQueue(con->messageQueue, &request);
 }
 
-void requestOrder(Connection* con, Order* orders) {
+Carrier requestOrder(Connection* con, Order* orders) {
   RequestData data;
   memcpy(&data, orders, sizeof(int) * countOrders(orders));
   Request request = {HUBERT_ADDR, con->this, ORDER, data};
+  sendViaMessageQueue(con->messageQueue, &request);
+
+  Request* requestIn = waitForMessageQueue(con->messageQueue, con->this);
+  return requestIn->data.carrier;
+}
+
+void sendOrder(Connection* con, Carrier carrier, Address forAddress) {
+  RequestData data = { .carrier = carrier };
+  Request request = {forAddress, con->this, ORDER, data};
   sendViaMessageQueue(con->messageQueue, &request);
 }
 

@@ -66,13 +66,12 @@ static Order* readOrder(Dish* menu) {
 
 int main() {
   Connection* con = initConnection(CLIENT_COM);
-  printf("Got address %ld\n", con->this);
 
   Dish* menu = requestMenu(con);
   printMenu(menu);
   Order* order = readOrder(menu);
-  printf("%d, %d, %d\n", order[0], order[1], order[3]);
-  requestOrder(con, order);
+  Carrier carrier = requestOrder(con, order);
+  printf("Got carrier %d\n", carrier);
 
   closeConnection(con);
   return EXIT_SUCCESS;

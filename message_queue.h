@@ -3,7 +3,9 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+
 #include "entity.h"
+#include "carrier.h"
 
 #define CLIENT_COM    0xBEEF
 #define RESTORANT_COM 0xCAFE
@@ -40,6 +42,7 @@ typedef enum {
 typedef union {
   bool senderIsMaster;
   Address address;
+  Carrier carrier;
   Dish menu[REQUEST_DATA_N_MENUS];
   Order order[REQUEST_DATA_N_ORDERS];
 } RequestData;

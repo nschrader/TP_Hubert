@@ -15,7 +15,8 @@ bool requestMaster(Connection* queue);
 void sendMaster(Connection* con);
 Dish* requestMenu(Connection* con);
 void sendMenu(Connection* con, Dish* menu, Address forAddress);
-void requestOrder(Connection* con, Order* orders);
+Carrier requestOrder(Connection* con, Order* orders);
+void sendOrder(Connection* con, Carrier carrier, Address forAddress);
 void closeConnection(Connection* con);
 void shutdownConnection(Connection* con);
 
