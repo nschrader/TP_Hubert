@@ -8,17 +8,24 @@
 
 Connection *con = NULL;
 
-void sayByeHandler() {
+void sayByeSignalHandler() {
   if (con != NULL) {
     closeConnection(con);
     con = NULL;
   }
 }
 
+void sayByeExitHandler(int exitStatus, void* p) {
+  (void) p;
+  if (exitStatus != EXIT_FAILURE) {
+    sayByeSignalHandler();
+  }
+}
+
 static void sayByeOnExit() {
-  signal(SIGTERM, &sayByeHandler);
-  signal(SIGINT, &sayByeHandler);
-  atexit(&sayByeHandler);
+  signal(SIGTERM, &sayByeSignalHandler);
+  signal(SIGINT, &sayByeSignalHandler);
+  on_exit(&sayByeExitHandler, NULL);
 }
 
 static void getMenu(Connection* con, Address source) {

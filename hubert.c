@@ -30,6 +30,7 @@ void removeQueuesHandler() {
   }
   if (carrierFleet != 0) {
     removeCarrierFleet(carrierFleet);
+    carrierFleet = 0;
   }
 }
 
