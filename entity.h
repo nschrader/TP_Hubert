@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-#define NAME_BUFFER 10
+#define NAME_BUFFER 20
 
 typedef struct {
   int id;

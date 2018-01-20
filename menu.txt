@@ -1,0 +1,7 @@
+01          PIZZA         10.90
+02          HAMBURGER      7.30
+03          KEBAB          6.50
+04          SALADE         5.50
+05          NUGGETS        6.00
+06          COUSCOUS       12.00
+07          STEAK          14.00

@@ -14,6 +14,24 @@ static void printMenu(Dish* menu) {
   }
 }
 
+/********************************* PARSING TXT ************************************/
+
+static void readMenu(FILE *file){
+  char stream[NAME_BUFFER];
+  if(file == NULL)
+    fprintf(stderr,"Menu does not exist");
+  else{
+    printf("Today's menu:\n");
+    printf("Order code | Description | Price\n");
+    while(fgets(stream,NAME_BUFFER,file) != NULL){
+      printf("%s",stream);
+    }
+    printf("-----------+-------------+---------\n");
+  }
+}
+
+/**********************************************************************************/
+
 static bool isIdInMenu(Dish* menu, Order id) {
   while (!IS_END_OF_DISHES(menu)) {
     if (menu->id == id) {
