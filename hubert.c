@@ -1,19 +1,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <signal.h>
+#include <pthread.h>
 
 #include "message_queue.h"
 #include "protocol.h"
 #include "misc.h"
+#include "restaurant_list.h"
 
 static Connection* clientCom = NULL;
-static Address addressCounter = FIRST_ADDR;
+static Address clientAddressPool = FIRST_ADDR;
+
+static Connection* restaurantCom = NULL;
+static Address restaurantAddressPool = FIRST_ADDR;
+static Restaurant* restaurants;
+pthread_t restaurantListener;
 
 void removeQueuesHandler() {
   if (clientCom != NULL) {
     shutdownConnection(clientCom);
     clientCom = NULL;
+    shutdownConnection(restaurantCom);
+    restaurantCom = NULL;
   }
 }
 
@@ -25,34 +35,52 @@ static void removeQueuesOnExit() {
 
 static void openQueues() {
   clientCom = bootstrapConnection(CLIENT_COM);
-}
-
-static void assignNewAddress() {
-  RequestData data = { .address = addressCounter++ };
-  Request requestOut = {NO_ADDR, HUBERT_ADDR, TALK, data};
-  sendViaMessageQueue(clientCom->messageQueue, &requestOut);
+  restaurantCom = bootstrapConnection(RESTORANT_COM);
 }
 
 static void checkIfSingleton() {
   bool isClientComMaster = requestMaster(clientCom);
-  bool isRestoComMaster = true;
+  bool isRestoComMaster = requestMaster(restaurantCom);
   if(!isClientComMaster || !isRestoComMaster) {
     free(clientCom);
     clientCom = NULL;
-    //free(restoCom);
-    //restCom = NULL;
+    free(restaurantCom);
+    restaurantCom = NULL;
     fatal("Another instance seems to be running!");
   }
 }
 
-static void getMenu(Address source) {
-  Dish menu[4] = {
-    { .id = 581, .name = "TexMex", .price = 149 },
-    { .id = 582, .name = "Burger", .price = 369},
-    { .id = 583, .name = "Kebab", .price = 279},
-    { 0 }
-  };
-  sendMenu(clientCom, menu, source);
+void *dolistenForRestaurantHandshake(void* p) {
+  (void) p;
+  while (true) {
+    Request* requestIn = waitForMessageQueue(restaurantCom->messageQueue, HUBERT_ADDR);
+    switch (requestIn->cmd) {
+      case MASTER:
+        sendMaster(restaurantCom);
+      case TALK:
+        handshakeConnection(restaurantCom, restaurantAddressPool);
+        restaurants = addRestaurant(restaurants, restaurantAddressPool++);
+        break;
+      case BYE:
+        restaurants = removeRestaurant(restaurants, requestIn->source);
+        break;
+      default:
+        warning("Unexpected command. Restaurant seems to be desynchronized!");
+        break;
+    }
+    free(requestIn);
+  }
+  return NULL;
+}
+
+static void startListeningForRestaurantHandshake() {
+  pthread_create(&restaurantListener, NULL, listenForRestaurantHandshake, NULL);
+}
+
+static void stopListeningForRestaurantHandshake() {
+  void* result;
+  pthread_cancel(restaurantListener);
+  pthread_join(restaurantListener, &result);
 }
 
 static void handleOrder(Request* request) {
@@ -63,21 +91,38 @@ static void handleOrder(Request* request) {
   sendOrder(clientCom, 1, request->source);
 }
 
-int main() {
-  openQueues();
-  checkIfSingleton();
-  removeQueuesOnExit();
+static void compileMenu(Address forAddress) {
+  stopListeningForRestaurantHandshake();
+  Dish *menu = NULL;
+  size_t menuN = 0;
+  Restaurant* r = restaurants;
+  while (r != NULL) {
+    Dish* restaurantMenu = requestMenu(restaurantCom, r->address);
+    size_t restaurantMenuSize = countDishes(restaurantMenu)-1;
+    size_t lastMenuSize = menuN;
+    menuN += restaurantMenuSize;
+    menu = realloc(menu, menuN*sizeof(Dish));
+    memcpy(menu+lastMenuSize, restaurantMenu, restaurantMenuSize*sizeof(Dish));
+    r = r->next;
+  }
+  menu = realloc(menu, ++menuN*sizeof(Dish));
+  memset(&menu[menuN], 0, sizeof(Dish));
+  startListeningForRestaurantHandshake();
 
+  sendMenu(clientCom, menu, forAddress);
+}
+
+static void listenToClientCom() {
   while (true) {
     Request* requestIn = waitForMessageQueue(clientCom->messageQueue, HUBERT_ADDR);
     switch (requestIn->cmd) {
       case MASTER:
         sendMaster(clientCom);
       case TALK:
-        assignNewAddress();
+        handshakeConnection(clientCom, clientAddressPool++);
         break;
       case MENU:
-        getMenu(requestIn->source);
+        compileMenu(requestIn->source);
         break;
       case ORDER:
         printf("Recieving order\n");
@@ -86,11 +131,20 @@ int main() {
       case BYE:
         break;
       default:
-        warning("Got unkonwn command, dunno what to do...");
+        warning("Unkonwn command. Am I talking to a client?");
         break;
     }
     free(requestIn);
   }
+}
+
+int main() {
+  openQueues();
+  checkIfSingleton();
+  removeQueuesOnExit();
+
+  startListeningForRestaurantHandshake();
+  listenToClientCom();
 
   return EXIT_SUCCESS;
 }

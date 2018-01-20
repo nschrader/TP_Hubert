@@ -28,6 +28,12 @@ Connection* initConnection(key_t key) {
   return con;
 }
 
+void handshakeConnection(Connection* con, Address newAddress) {
+  RequestData data = { .address = newAddress };
+  Request requestOut = {NO_ADDR, con->this, TALK, data};
+  sendViaMessageQueue(con->messageQueue, &requestOut);
+}
+
 static bool isThisInstanceMaster(Request* answer) {
   if (answer == NULL) {
     return true;
@@ -60,8 +66,8 @@ void sendMaster(Connection* con) {
   sendViaMessageQueue(con->messageQueue, &requestOut);
 }
 
-Dish* requestMenu(Connection* con) {
-  Request requestOut = {HUBERT_ADDR, con->this, MENU, NO_REQUEST_DATA};
+Dish* requestMenu(Connection* con, Address formAddress) {
+  Request requestOut = {formAddress, con->this, MENU, NO_REQUEST_DATA};
   sendViaMessageQueue(con->messageQueue, &requestOut);
 
   Request* requestIn = waitForMessageQueue(con->messageQueue, con->this);

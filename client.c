@@ -67,7 +67,7 @@ static Order* readOrder(Dish* menu) {
 int main() {
   Connection* con = initConnection(CLIENT_COM);
 
-  Dish* menu = requestMenu(con);
+  Dish* menu = requestMenu(con, HUBERT_ADDR);
   printMenu(menu);
   Order* order = readOrder(menu);
   Carrier carrier = requestOrder(con, order);

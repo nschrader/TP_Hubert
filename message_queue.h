@@ -32,7 +32,7 @@ typedef struct {
 typedef long Address;
 
 typedef enum {
-  MASTER, TALK, MENU, ORDER, OK, KO, BYE
+  MASTER, TALK, MENU, ORDER, STOCK, BYE
 } Command;
 
 #define REQUEST_NO_PAYLOAD (sizeof(Address)+sizeof(Command))

@@ -10,6 +10,7 @@
 #include "message_queue.h"
 #include "misc.h"
 #include "entity.h"
+#include "hubert.h"
 
 #define SINGLETON 1
 #define ONLY_SEMAPHORE 0
@@ -89,6 +90,8 @@ static Request* checkMessageQueue(MessageQueue* queue, Address forAddress, bool 
     if (errno == ENOMSG && !shouldWait) {
       errno = NO_ERRNO;
       return NULL;
+    } else if (errno == EIDRM) {
+      fatal("Lost connection to " HUBERT_NAME);
     } else {
       fatal("Cannot read from message queue");
     }

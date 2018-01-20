@@ -9,11 +9,12 @@ typedef struct {
   Address this;
 } Connection;
 
-Connection* initConnection(key_t key);
 Connection* bootstrapConnection(key_t key);
-bool requestMaster(Connection* queue);
+Connection* initConnection(key_t key);
+void handshakeConnection(Connection* con, Address newAddress);
+bool requestMaster(Connection* con);
 void sendMaster(Connection* con);
-Dish* requestMenu(Connection* con);
+Dish* requestMenu(Connection* con, Address formAddress);
 void sendMenu(Connection* con, Dish* menu, Address forAddress);
 Carrier requestOrder(Connection* con, Order* orders);
 void sendOrder(Connection* con, Carrier carrier, Address forAddress);
