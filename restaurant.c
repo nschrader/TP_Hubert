@@ -1,9 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 
 #include "message_queue.h"
 #include "protocol.h"
 #include "misc.h"
+
+Connection *con = NULL;
+
+void sayByeHandler() {
+  if (con != NULL) {
+    closeConnection(con);
+    con = NULL;
+  }
+}
+
+static void sayByeOnExit() {
+  signal(SIGTERM, &sayByeHandler);
+  signal(SIGINT, &sayByeHandler);
+  atexit(&sayByeHandler);
+}
 
 static void getMenu(Connection* con, Address source) {
   Dish menu[4] = {
@@ -31,7 +47,7 @@ static void listenToHubert(Connection* con) {
 }
 
 int main() {
-  Connection *con = initConnection(RESTORANT_COM);
+  con = initConnection(RESTORANT_COM);
+  sayByeOnExit();
   listenToHubert(con);
-
 }

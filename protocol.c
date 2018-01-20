@@ -74,22 +74,16 @@ Dish* requestMenu(Connection* con, Address formAddress) {
   return requestIn->data.menu;
 }
 
-#include <stdio.h>
-
 void sendMenu(Connection* con, Dish* menu, Address forAddress) {
   RequestData data;
-  printf("Do memcpy\n");
   memcpy(&data, menu, sizeof(Dish) * countDishes(menu));
-  malloc(1);
   Request request = {forAddress, con->this, MENU, data};
   sendViaMessageQueue(con->messageQueue, &request);
 }
 
 Carrier requestOrder(Connection* con, Order* orders) {
   RequestData data;
-  printf("Do memcpy\n");
   memcpy(&data, orders, sizeof(Order) * countOrders(orders));
-  malloc(1);
   Request request = {HUBERT_ADDR, con->this, ORDER, data};
   sendViaMessageQueue(con->messageQueue, &request);
 
@@ -104,7 +98,7 @@ void sendOrder(Connection* con, Carrier carrier, Address forAddress) {
 }
 
 void closeConnection(Connection* con) {
-  Request requestOut = {HUBERT_ADDR, con->this, BYE, NO_REQUEST_DATA};
+  Request requestOut = {FALLBACK_ADDR, con->this, BYE, NO_REQUEST_DATA};
   sendViaMessageQueue(con->messageQueue, &requestOut);
   free(con->messageQueue);
   free(con);

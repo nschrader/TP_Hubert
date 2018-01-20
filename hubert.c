@@ -121,15 +121,11 @@ static void compileMenu(Address forAddress) {
     size_t lastMenuSize = menuN;
     menuN += restaurantMenuSize;
     menu = realloc(menu, menuN*sizeof(Dish));
-    printf("Do memcpy\n");
     memcpy(menu+lastMenuSize, restaurantMenu, restaurantMenuSize*sizeof(Dish));
-    malloc(1);
     r = r->next;
   }
   menu = realloc(menu, ++menuN*sizeof(Dish));
-  printf("Do memset\n");
   memset(&menu[menuN-1], 0, sizeof(Dish));
-  malloc(1);
 
   sendMenu(clientCom, menu, forAddress);
 }
@@ -140,17 +136,12 @@ static void listenToClientCom() {
     switch (requestIn->cmd) {
       case MASTER:
         sendMaster(clientCom);
-      case TALK:
-        handshakeConnection(clientCom, clientAddressPool++);
-        break;
       case MENU:
         compileMenu(requestIn->source);
         break;
       case ORDER:
         printf("Recieving order\n");
         handleOrder(requestIn);
-        break;
-      case BYE:
         break;
       default:
         warning("Unkonwn command. Am I talking to a client?");
