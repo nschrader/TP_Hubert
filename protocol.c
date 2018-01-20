@@ -16,7 +16,7 @@ Connection* bootstrapConnection(key_t key) {
 
 Connection* initConnection(key_t key) {
   MessageQueue* queue = openMessageQueue(key);
-  Request requestOut = {HUBERT_ADDR, NO_ADDR, TALK, NO_REQUEST_DATA};
+  Request requestOut = {FALLBACK_ADDR, NO_ADDR, TALK, NO_REQUEST_DATA};
   sendViaMessageQueue(queue, &requestOut);
 
   Request* requestIn = waitForMessageQueue(queue, NO_ADDR);
@@ -47,10 +47,10 @@ static bool isThisInstanceMaster(Request* answer) {
 
 bool requestMaster(Connection *con) {
   RequestData data = { .senderIsMaster = false };
-  Request request = {HUBERT_ADDR, FALLBACK_ADDR, MASTER, data};
+  Request request = {FALLBACK_ADDR, HUBERT_ADDR, MASTER, data};
   sendViaMessageQueue(con->messageQueue, &request);
   usleep(500);
-  Request* requestAnswer = getFromMessageQueue(con->messageQueue, FALLBACK_ADDR);
+  Request* requestAnswer = getFromMessageQueue(con->messageQueue, HUBERT_ADDR);
   if (isThisInstanceMaster(requestAnswer)) {
     while(getFromMessageQueue(con->messageQueue, HUBERT_ADDR) != NULL);
     while(getFromMessageQueue(con->messageQueue, FALLBACK_ADDR) != NULL);
@@ -62,7 +62,7 @@ bool requestMaster(Connection *con) {
 
 void sendMaster(Connection* con) {
   RequestData data = { .senderIsMaster = true };
-  Request requestOut = {FALLBACK_ADDR, con->this, MASTER, data};
+  Request requestOut = {HUBERT_ADDR, con->this, MASTER, data};
   sendViaMessageQueue(con->messageQueue, &requestOut);
 }
 
@@ -74,16 +74,22 @@ Dish* requestMenu(Connection* con, Address formAddress) {
   return requestIn->data.menu;
 }
 
+#include <stdio.h>
+
 void sendMenu(Connection* con, Dish* menu, Address forAddress) {
   RequestData data;
+  printf("Do memcpy\n");
   memcpy(&data, menu, sizeof(Dish) * countDishes(menu));
+  malloc(1);
   Request request = {forAddress, con->this, MENU, data};
   sendViaMessageQueue(con->messageQueue, &request);
 }
 
 Carrier requestOrder(Connection* con, Order* orders) {
   RequestData data;
-  memcpy(&data, orders, sizeof(int) * countOrders(orders));
+  printf("Do memcpy\n");
+  memcpy(&data, orders, sizeof(Order) * countOrders(orders));
+  malloc(1);
   Request request = {HUBERT_ADDR, con->this, ORDER, data};
   sendViaMessageQueue(con->messageQueue, &request);
 

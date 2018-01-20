@@ -16,7 +16,6 @@ static Address clientAddressPool = FIRST_ADDR;
 static Connection* restaurantCom = NULL;
 static Address restaurantAddressPool = FIRST_ADDR;
 static Restaurant* restaurants;
-pthread_t restaurantListener;
 
 void removeQueuesHandler() {
   if (clientCom != NULL) {
@@ -50,10 +49,10 @@ static void checkIfSingleton() {
   }
 }
 
-void *dolistenForRestaurantHandshake(void* p) {
+void *doListenForRestaurantHandshake(void* p) {
   (void) p;
   while (true) {
-    Request* requestIn = waitForMessageQueue(restaurantCom->messageQueue, HUBERT_ADDR);
+    Request* requestIn = waitForMessageQueue(restaurantCom->messageQueue, FALLBACK_ADDR);
     switch (requestIn->cmd) {
       case MASTER:
         sendMaster(restaurantCom);
@@ -73,14 +72,35 @@ void *dolistenForRestaurantHandshake(void* p) {
   return NULL;
 }
 
-static void startListeningForRestaurantHandshake() {
-  pthread_create(&restaurantListener, NULL, listenForRestaurantHandshake, NULL);
+static void listenForRestaurantHandshake() {
+  pthread_t thread;
+  pthread_create(&thread, NULL, doListenForRestaurantHandshake, NULL);
 }
 
-static void stopListeningForRestaurantHandshake() {
-  void* result;
-  pthread_cancel(restaurantListener);
-  pthread_join(restaurantListener, &result);
+void *doListenForClientHandshake(void* p) {
+  (void) p;
+  while (true) {
+    Request* requestIn = waitForMessageQueue(clientCom->messageQueue, FALLBACK_ADDR);
+    switch (requestIn->cmd) {
+      case MASTER:
+        sendMaster(restaurantCom);
+      case TALK:
+        handshakeConnection(clientCom, clientAddressPool++);
+        break;
+      case BYE:
+        break;
+      default:
+        warning("Unexpected command. Client seems to be desynchronized!");
+        break;
+    }
+    free(requestIn);
+  }
+  return NULL;
+}
+
+static void listenForClientHandshake() {
+  pthread_t thread;
+  pthread_create(&thread, NULL, doListenForClientHandshake, NULL);
 }
 
 static void handleOrder(Request* request) {
@@ -92,7 +112,6 @@ static void handleOrder(Request* request) {
 }
 
 static void compileMenu(Address forAddress) {
-  stopListeningForRestaurantHandshake();
   Dish *menu = NULL;
   size_t menuN = 0;
   Restaurant* r = restaurants;
@@ -102,12 +121,15 @@ static void compileMenu(Address forAddress) {
     size_t lastMenuSize = menuN;
     menuN += restaurantMenuSize;
     menu = realloc(menu, menuN*sizeof(Dish));
+    printf("Do memcpy\n");
     memcpy(menu+lastMenuSize, restaurantMenu, restaurantMenuSize*sizeof(Dish));
+    malloc(1);
     r = r->next;
   }
   menu = realloc(menu, ++menuN*sizeof(Dish));
-  memset(&menu[menuN], 0, sizeof(Dish));
-  startListeningForRestaurantHandshake();
+  printf("Do memset\n");
+  memset(&menu[menuN-1], 0, sizeof(Dish));
+  malloc(1);
 
   sendMenu(clientCom, menu, forAddress);
 }
@@ -143,7 +165,8 @@ int main() {
   checkIfSingleton();
   removeQueuesOnExit();
 
-  startListeningForRestaurantHandshake();
+  listenForRestaurantHandshake();
+  listenForClientHandshake();
   listenToClientCom();
 
   return EXIT_SUCCESS;
