@@ -3,6 +3,7 @@ CFLAGS	= -g -Wall -std=c99 -D_GNU_SOURCE -Wno-missing-braces #GCC Bug GCC #53119
 LDFLAGS	= -lpthread
 
 COMMON = \
+	carrier.c \
 	message_queue.c \
 	protocol.c \
 	misc.c \

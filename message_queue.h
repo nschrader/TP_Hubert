@@ -15,11 +15,6 @@
 #define HUBERT_ADDR   0xBABE
 #define FALLBACK_ADDR 0xDEAD
 
-#define IPC_NOFLAGS   0
-#define IPC_ALLWRITE  0666
-
-#define ERROR         -1
-#define NO_ERRNO      0
 #define MSGMAX        8192 //Let's hope that it's the POSIX default value
 
 #define GCC_ATTRIBUTE_PACKED __attribute__((__packed__))

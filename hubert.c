@@ -17,12 +17,19 @@ static Connection* restaurantCom = NULL;
 static Address restaurantAddressPool = FIRST_ADDR;
 static Restaurant* restaurants;
 
+static CarrierFleet carrierFleet= 0;
+
 void removeQueuesHandler() {
   if (clientCom != NULL) {
     shutdownConnection(clientCom);
     clientCom = NULL;
+  }
+  if (restaurantCom != NULL) {
     shutdownConnection(restaurantCom);
     restaurantCom = NULL;
+  }
+  if (carrierFleet != 0) {
+    removeCarrierFleet(carrierFleet);
   }
 }
 
@@ -35,6 +42,7 @@ static void removeQueuesOnExit() {
 static void openQueues() {
   clientCom = bootstrapConnection(CLIENT_COM);
   restaurantCom = bootstrapConnection(RESTORANT_COM);
+  carrierFleet = createCarrierFleet();
 }
 
 static void checkIfSingleton() {
@@ -107,8 +115,9 @@ static void handleOrder(Request* request) {
   Order* order = request->data.order;
   printf("%d, %d, %d\n", order[0], order[1], order[3]);
   //do stuff with order
+  Carrier carrier = dispatchCarrier(carrierFleet);
   //get carrier
-  sendOrder(clientCom, 1, request->source);
+  sendOrder(clientCom, carrier, request->source);
 }
 
 static void compileMenu(Address forAddress) {

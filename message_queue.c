@@ -64,24 +64,6 @@ void removeMessageQueue(MessageQueue* queue) {
   fatal("Could not remove message queue");
 }
 
-static void operateOnSemaphore(int semid, int val) {
-  struct sembuf operation;
-  operation.sem_num = ONLY_SEMAPHORE;
-  operation.sem_op = val;
-  operation.sem_flg = IPC_NOFLAGS;
-  if (semop(semid, &operation, 1) == ERROR) {
-    fatal("Could not operate on semaphore");
-  }
-}
-
-static void V(int semid) {
-  operateOnSemaphore(semid, 1);
-}
-
-static void P(int semid) {
-  operateOnSemaphore(semid, -1);
-}
-
 static Request* checkMessageQueue(MessageQueue* queue, Address forAddress, bool shouldWait) {
   Request* request = malloc(sizeof(Request));
   int flags = shouldWait ? IPC_NOFLAGS : IPC_NOWAIT;
@@ -97,7 +79,7 @@ static Request* checkMessageQueue(MessageQueue* queue, Address forAddress, bool 
     }
   }
   if (forAddress == NO_ADDR) {
-    V(queue->semid);
+    V(queue->semid, ONLY_SEMAPHORE);
   }
   return request;
 }
@@ -124,7 +106,7 @@ size_t getPayloadSizeFrom(Request* request) {
 
 void sendViaMessageQueue(MessageQueue* queue, Request* request) {
   if (request->source == NO_ADDR) {
-    P(queue->semid);
+    P(queue->semid, ONLY_SEMAPHORE);
   }
   size_t payload = getPayloadSizeFrom(request);
   if (msgsnd(queue->msqid, request, payload, IPC_NOFLAGS) == ERROR) {

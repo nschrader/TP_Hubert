@@ -71,7 +71,10 @@ int main() {
   printMenu(menu);
   Order* order = readOrder(menu);
   Carrier carrier = requestOrder(con, order);
+
+  CarrierFleet fleet = openCarrierFleet();
   printf("Got carrier %d\n", carrier);
+  waitForCarrier(carrier, fleet);
 
   closeConnection(con);
   return EXIT_SUCCESS;
