@@ -8,7 +8,7 @@
 #include "carrier.h"
 
 #define CLIENT_COM    0xBEEF
-#define RESTORANT_COM 0xCAFE
+#define RESTAURANT_COM 0xCAFE
 
 #define NO_ADDR       0x0001
 #define FIRST_ADDR    0x0002
