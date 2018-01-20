@@ -3,6 +3,8 @@
 
 #include "message_queue.h"
 #include "protocol.h"
+#include "misc.h"
+#include "hubert.h"
 
 static void printMenu(Dish* menu) {
   printf("Today's menu:\n");
@@ -73,8 +75,13 @@ int main() {
   Carrier carrier = requestOrder(con, order);
 
   CarrierFleet fleet = openCarrierFleet();
-  printf("Got carrier %d\n", carrier);
-  waitForCarrier(carrier, fleet);
+  if (carrier == ERROR) {
+    printf("%s is out of carriers. Your order cannot be delivered. ", HUBERT_NAME);
+    printf("Please try again later!\n");
+  } else {
+    printf("Waiting for Carrier...\n");
+    waitForCarrier(carrier, fleet);
+  }
 
   closeConnection(con);
   return EXIT_SUCCESS;

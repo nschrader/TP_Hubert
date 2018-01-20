@@ -53,7 +53,6 @@ CarrierFleet openCarrierFleet() {
 static Carrier getFreeCarrier(CarrierFleet fleet) {
   for (int i = 0; i < N_CARRIERS; i++) {
     int truc = semctl(fleet, i, GETVAL);
-    printf("sem %d: %d\n", i, truc);
     if (truc == 1) {
       return i;
     }
@@ -70,15 +69,13 @@ void* dispatchSpecificCarrier(void* p) {
 
 Carrier dispatchCarrier(CarrierFleet fleet) {
   Carrier carrier = getFreeCarrier(fleet);
-  if (carrier == ERROR) {
-    printf("No available carrier"); //What shall we do here?
+  if (carrier != ERROR) {
+    pthread_t thread;
+    DispatchOpts *opts = malloc(sizeof(DispatchOpts));
+    opts->fleet = fleet;
+    opts->carrier = carrier;
+    pthread_create(&thread, NULL, dispatchSpecificCarrier, opts);
   }
-
-  pthread_t thread;
-  DispatchOpts *opts = malloc(sizeof(DispatchOpts));
-  opts->fleet = fleet;
-  opts->carrier = carrier;
-  pthread_create(&thread, NULL, dispatchSpecificCarrier, opts);
 
   return carrier;
 }

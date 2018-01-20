@@ -117,7 +117,6 @@ static void handleOrder(Request* request) {
   printf("%d, %d, %d\n", order[0], order[1], order[3]);
   //do stuff with order
   Carrier carrier = dispatchCarrier(carrierFleet);
-  //get carrier
   sendOrder(clientCom, carrier, request->source);
 }
 
@@ -150,7 +149,6 @@ static void listenToClientCom() {
         compileMenu(requestIn->source);
         break;
       case ORDER:
-        printf("Recieving order\n");
         handleOrder(requestIn);
         break;
       default:
