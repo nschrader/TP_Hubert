@@ -8,7 +8,8 @@ COMMON = \
 	protocol.c \
 	misc.c \
 	restaurant_list.c \
-	entity.c
+	entity.c \
+	kitchen.c
 HUBERT = \
 	hubert.c
 RESTAURANT = \

@@ -6,6 +6,7 @@
 
 #define ERROR         -1
 #define NO_ERRNO      0
+#define CHILD         0
 
 #define fatal(x) _fatal("[Fatal] " x);
 void _fatal(char* errorMessage);

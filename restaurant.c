@@ -1,12 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <unistd.h>
 
 #include "message_queue.h"
 #include "protocol.h"
 #include "misc.h"
+#include "kitchen.h"
 
-Connection *con = NULL;
+static Connection *con = NULL;
+static Dish* menu = NULL;
 
 void sayByeSignalHandler() {
   if (con != NULL) {
@@ -29,23 +32,35 @@ static void sayByeOnExit() {
 }
 
 static void getMenu(Connection* con, Address source) {
-  //Get this stuff from kitchen
-  Dish menu[4] = {
-    { .id = 581, .name = "TexMex", .price = 149 },
-    { .id = 582, .name = "Burger", .price = 369},
-    { .id = 583, .name = "Kebab", .price = 279},
-    { 0 }
-  };
   sendMenu(con, menu, source);
 }
 
 static void getOrder(Connection* con, Order* order, Address source) {
-  //Remove from kitchen, if this restaurant offers this dish
-  //* If we don't send ok = true anyways
-  //* If we do and we have more than 0 dishes left, send ok = true
-  //* If we do and we have only 0 dishes left, send ok = true
-  printf("Got orders: %d, %d, %d\n", order[0], order[1], order[3]);
-  sendOrder(con, true, source);
+  bool everythingAvailable = true;
+  for (int i = 0; i < countOrders(order)-1; i++) {
+    for (int j = 0; j < countDishes(menu)-1; j++) {
+      if (order[i] == menu[j].id) {
+        if (menu[j].quantity < 1) {
+          everythingAvailable = false;
+          break;
+        }
+      }
+    }
+  }
+  if (everythingAvailable) {
+    for(int i = 0; i < countOrders(order)-1; i++) {
+      for(int j = 0; j < countDishes(menu)-1; j++) {
+        if (order[i] == menu[j].id) {
+          menu[j].quantity--;
+        }
+      }
+    }
+    info("Treated an order successfully");
+    sendOrder(con, true, source);
+  } else {
+    warning("We are out of stock. What is the kitchen doing?");
+    sendOrder(con, false, source);
+  }
 }
 
 static void listenToHubert(Connection* con) {
@@ -66,8 +81,21 @@ static void listenToHubert(Connection* con) {
   }
 }
 
-int main() {
-  con = initConnection(RESTORANT_COM);
-  sayByeOnExit();
-  listenToHubert(con);
+int main(int argc, char *argv[]) {
+  if (argc != 2) {
+    fatal("No menu file specified");
+  }
+  RequestData* data = createSharedMemeory();
+  menu = data->menu;
+  readMenu(argv[1], data);
+
+  if (fork() == CHILD) {
+    beKitchen(menu);
+  } else {
+    con = initConnection(RESTORANT_COM);
+    sayByeOnExit();
+    listenToHubert(con);
+  }
+
+  return EXIT_SUCCESS;
 }

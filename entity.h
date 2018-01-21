@@ -9,6 +9,7 @@ typedef struct {
   int id;
   char name[NAME_BUFFER];
   int price; //cents
+  int quantity;
 } Dish;
 #define IS_END_OF_DISHES(x) (*((int*) x) == 0)
 
