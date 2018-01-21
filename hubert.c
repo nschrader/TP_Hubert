@@ -84,6 +84,7 @@ void *doListenForRestaurantHandshake(void* p) {
 static void listenForRestaurantHandshake() {
   pthread_t thread;
   pthread_create(&thread, NULL, doListenForRestaurantHandshake, NULL);
+  pthread_detach(thread);
 }
 
 void *doListenForClientHandshake(void* p) {
@@ -110,6 +111,7 @@ void *doListenForClientHandshake(void* p) {
 static void listenForClientHandshake() {
   pthread_t thread;
   pthread_create(&thread, NULL, doListenForClientHandshake, NULL);
+  pthread_detach(thread);
 }
 
 static void handleOrder(Request* request) {

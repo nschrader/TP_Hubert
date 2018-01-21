@@ -75,6 +75,7 @@ Carrier dispatchCarrier(CarrierFleet fleet) {
     opts->fleet = fleet;
     opts->carrier = carrier;
     pthread_create(&thread, NULL, dispatchSpecificCarrier, opts);
+    pthread_detach(thread);
   }
 
   return carrier;
