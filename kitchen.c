@@ -38,7 +38,7 @@ void readMenu(char* menuPath, RequestData *data) {
 
   Dish* menu = data->menu;
   int idx;
-  for (idx = 0; idx < REQUEST_DATA_N_MENUS-1; idx++) {
+  for (idx = 0; idx < REQUEST_DATA_N_DISHES-1; idx++) {
     ssize_t nRead = getline(&line, &lineN, menuFile);
     if (nRead != ERROR) {
       memcpy(menu[idx].name, line, NAME_BUFFER);

@@ -1,0 +1,4 @@
+This project uses Doxygen:
+
+Run "make doc" or "doxygen ." and open "index.html"
+in the "html" folder using your browser.

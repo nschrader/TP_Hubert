@@ -6,7 +6,6 @@
 #include <errno.h>
 
 #include "misc.h"
-#include "hubert.h"
 
 void _fatal(char* errorMessage) {
   if (errno == EINTR) {

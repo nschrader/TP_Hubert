@@ -25,7 +25,7 @@ CLIENT_O = ${CLIENT:.c=.c.o}
 
 .PHONY: 		all clean doc
 
-all:				hubert restaurant client #doc
+all:				hubert restaurant client doc
 
 hubert:			${COMMON_O} ${HUBERT_O} ${HDR}
 						${CC} -o $@ $^ ${LDFLAGS}
@@ -40,7 +40,7 @@ client:			${COMMON_O} ${CLIENT_O} ${HDR}
 						${CC} -c -o $@ $< ${CFLAGS}
 
 clean:
-						rm -rf *.c.o hubert restaurant client
+						rm -rf *.c.o hubert restaurant client html
 
 doc:
 						doxygen

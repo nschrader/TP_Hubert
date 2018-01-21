@@ -1,6 +1,8 @@
 #ifndef MISC_H
 #define MISC_H
 
+#define HUBERT_NAME "hubert"
+
 #define IPC_NOFLAGS   0
 #define IPC_ALLWRITE  0666
 

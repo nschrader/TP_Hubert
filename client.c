@@ -4,7 +4,6 @@
 #include "message_queue.h"
 #include "protocol.h"
 #include "misc.h"
-#include "hubert.h"
 
 static void printMenu(Dish* menu) {
   printf("Today's menu:\n");
