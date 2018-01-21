@@ -72,12 +72,12 @@ int main() {
   Dish* menu = requestMenu(con, HUBERT_ADDR);
   printMenu(menu);
   Order* order = readOrder(menu);
-  Carrier carrier = requestOrder(con, order);
+  Carrier carrier = requestOrder(con, order, HUBERT_ADDR);
 
   CarrierFleet fleet = openCarrierFleet();
   if (carrier == ERROR) {
-    printf("%s is out of carriers. Your order cannot be delivered. ", HUBERT_NAME);
-    printf("Please try again later!\n");
+    printf("%s is either out of carriers or your order is suddenly out of stock.\n", HUBERT_NAME);
+    printf("Your order cannot be delivered. Please try again later!\n");
   } else {
     printf("Waiting for Carrier...\n");
     waitForCarrier(carrier, fleet);

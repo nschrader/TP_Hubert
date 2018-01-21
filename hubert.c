@@ -116,9 +116,13 @@ static void listenForClientHandshake() {
 
 static void handleOrder(Request* request) {
   Order* order = request->data.order;
-  printf("%d, %d, %d\n", order[0], order[1], order[3]);
-  //do stuff with order
-  Carrier carrier = dispatchCarrier(carrierFleet);
+  Restaurant* r = restaurants;
+  bool ok = true;
+  while (r != NULL) {
+    ok &= requestOrder(restaurantCom, order, r->address);
+    r = r->next;
+  }
+  Carrier carrier = (ok) ? dispatchCarrier(carrierFleet) : ERROR;
   sendOrder(clientCom, carrier, request->source);
 }
 
