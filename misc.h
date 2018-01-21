@@ -13,6 +13,9 @@ void _fatal(char* errorMessage);
 #define warning(x) _warning("[Warning] " x);
 void _warning(char* errorMessage);
 
+#define info(x) _info("[Info] " x)
+void _info(char* infoMessage);
+
 void V(int semid, int sem_num);
 void P(int semid, int sem_num);
 void V2(int semid, int sem_num);

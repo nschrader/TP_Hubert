@@ -32,6 +32,10 @@ void _warning(char* errorMessage) {
   }
 }
 
+void _info(char* infoMessage) {
+  printf("%s\n", infoMessage);
+}
+
 static void operateOnSemaphore(int semid, int sem_num, int val) {
   struct sembuf operation;
   operation.sem_num = sem_num;

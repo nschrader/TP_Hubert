@@ -68,9 +68,11 @@ void *doListenForRestaurantHandshake(void* p) {
       case TALK:
         handshakeConnection(restaurantCom, restaurantAddressPool);
         restaurants = addRestaurant(restaurants, restaurantAddressPool++);
+        info("New restaurant available");
         break;
       case BYE:
         restaurants = removeRestaurant(restaurants, requestIn->source);
+        info("A restaurant ceased its service");
         break;
       default:
         warning("Unexpected command. Restaurant seems to be desynchronized!");
@@ -96,8 +98,10 @@ void *doListenForClientHandshake(void* p) {
         sendMaster(restaurantCom);
       case TALK:
         handshakeConnection(clientCom, clientAddressPool++);
+        info("New client connected");
         break;
       case BYE:
+        info("A client disconnected");
         break;
       default:
         warning("Unexpected command. Client seems to be desynchronized!");

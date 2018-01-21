@@ -6,6 +6,7 @@
 #include "protocol.h"
 #include "message_queue.h"
 #include "entity.h"
+#include "misc.h"
 
 Connection* bootstrapConnection(key_t key) {
   Connection* con = malloc(sizeof(Connection));
@@ -64,6 +65,7 @@ void sendMaster(Connection* con) {
   RequestData data = { .senderIsMaster = true };
   Request requestOut = {HUBERT_ADDR, con->this, MASTER, data};
   sendViaMessageQueue(con->messageQueue, &requestOut);
+  warning("Another instance of hubert is born. Raping it...");
 }
 
 Dish* requestMenu(Connection* con, Address formAddress) {
