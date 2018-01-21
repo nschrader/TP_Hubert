@@ -4,8 +4,7 @@
 #include <stdio.h>
 #include "message_queue.h"
 
-#define DISH_STOCK 2
-#define DISH_THRESHOLD 1
+#define DISH_THRESHOLD 2
 
 RequestData* createSharedMemeory();
 void readMenu(char *menuPath, RequestData *data);

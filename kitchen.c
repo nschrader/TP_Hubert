@@ -75,8 +75,9 @@ void beKitchen(Dish* menu) {
   while (true) {
     for (int i = 0; i < countDishes(menu)-1; i++) {
       if (menu[i].quantity <= DISH_THRESHOLD) {
-        menu[i].quantity = DISH_STOCK;
+        menu[i].quantity++;
         info("Noise from the kitchen: ...Cooking");
+        break;
       }
     }
     sleep(10);
