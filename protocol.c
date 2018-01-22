@@ -68,8 +68,8 @@ void sendMaster(Connection* con) {
   warning("Another instance of hubert is born. Raping it...");
 }
 
-Dish* requestMenu(Connection* con, Address formAddress) {
-  Request requestOut = {formAddress, con->this, MENU, NO_REQUEST_DATA};
+Dish* requestMenu(Connection* con, Address forAddress) {
+  Request requestOut = {forAddress, con->this, MENU, NO_REQUEST_DATA};
   sendViaMessageQueue(con->messageQueue, &requestOut);
 
   Request* requestIn = waitForMessageQueue(con->messageQueue, con->this);

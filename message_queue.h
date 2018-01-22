@@ -63,11 +63,11 @@ typedef enum {
   MASTER, TALK, MENU, ORDER, BYE
 } Command;
 
-//! Size of an request without payload
+//! Size of a request without payload
 #define REQUEST_NO_PAYLOAD (sizeof(Address)+sizeof(Command))
-//! Quantiy of @Dish we can stock in @RequestData
+//! Quantiy of @ref Dish we can stock in @ref RequestData
 #define REQUEST_DATA_N_DISHES ((MSGMAX-REQUEST_NO_PAYLOAD)/sizeof(Dish))
-//! Quantiy of @Order we can stock in @RequestData
+//! Quantiy of @ref Order we can stock in @ref RequestData
 #define REQUEST_DATA_N_ORDERS  ((MSGMAX-REQUEST_NO_PAYLOAD)/sizeof(int))
 
 /**
@@ -96,9 +96,13 @@ typedef union {
  * @struct Request
  * A request to be send via a message queue
  * @var Request::destination
+ * The address of the destination ressource
  * @var Request::source
+ * The address of this instance
  * @var Request::cmd
+ * The command to execute
  * @var Request::data
+ * The data needed by @ref Request::cmd
  */
 typedef struct GCC_ATTRIBUTE_PACKED {
   Address destination;
@@ -116,7 +120,7 @@ typedef struct GCC_ATTRIBUTE_PACKED {
 
 /**
  * Create a message queue if it does not exist yet
- * @param
+ * @param key
  * A message queue key
  * @returns
  * A message queue abstraction
@@ -125,7 +129,7 @@ MessageQueue* createMessageQueue(key_t key);
 
 /**
  * Open a message queue that does exist
- * @param
+ * @param key
  * A message queue key
  * @returns
  * A message queue abstraction
@@ -142,10 +146,40 @@ size_t getPayloadSizeFrom(Request* request);
 
 /**
  * Make a non blocking attempt to read from message queue
+ * @param queue
+ * Message queue abstraction to read from
+ * @param forAddress
+ * Address to fetch messages for
+ * @returns
+ * The next request in queue, or NULL if there aren't any
  */
 Request* getFromMessageQueue(MessageQueue* queue, Address forAddress);
+
+/**
+ * Make a blocking attempt to read from message queue
+ * @param queue
+ * Message queue abstraction to read from
+ * @param forAddress
+ * Address to fetch messages for
+ * @returns
+ * The next request in queue
+ */
 Request* waitForMessageQueue(MessageQueue* queue, Address forAddress);
-void sendViaMessageQueue(MessageQueue* id, Request* request);
-void removeMessageQueue(MessageQueue* id);
+
+/**
+ * Send request via message queue
+ * @param queue
+ * Message queue abstraction to send via
+ * @param request
+ * The request to send
+ */
+void sendViaMessageQueue(MessageQueue* queue, Request* request);
+
+/**
+ * Delete messsage queue abstraction
+ * @param queue
+ * Message queue abstraction to remove
+ */
+void removeMessageQueue(MessageQueue* queue);
 
 #endif

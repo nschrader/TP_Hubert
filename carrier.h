@@ -30,7 +30,7 @@ CarrierFleet createCarrierFleet();
 CarrierFleet openCarrierFleet();
 
 /**
- * Start new thread that is going to liberate the according semaphore in
+ * Start new thread that is going to liberate the corresponding semaphore in
  * a few seconds
  */
 Carrier dispatchCarrier(CarrierFleet fleet);

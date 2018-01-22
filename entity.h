@@ -14,7 +14,9 @@
  * @struct Dish
  * Represents a dish or, in case of an array, a menu
  * @var Dish::id
+ * A system-wide unique identifier
  * @var Dish::name
+ * The name ot this dish
  * @var Dish::price
  * The price in cents
  * @var Dish::quantity
@@ -33,7 +35,7 @@ typedef struct {
 #define IS_END_OF_DISHES(x) (*((int*) x) == 0)
 
 /**
- * An order is nothing but a @ref Dish id
+ * An order is nothing but a @ref Dish::id
  */
 typedef int Order;
 
