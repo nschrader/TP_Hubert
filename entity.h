@@ -1,6 +1,6 @@
 /**
  * @file
- * Basic entites modeling real life
+ * Basic entities modeling real life
  */
 
 #ifndef ENTITY_H
@@ -18,7 +18,7 @@
  * @var Dish::price
  * The price in cents
  * @var Dish::quantity
- * Only used be restaurant and kitchen to manage stock
+ * Only used by restaurant and kitchen to manage stock
  */
 typedef struct {
   int id;

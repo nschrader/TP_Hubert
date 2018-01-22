@@ -9,7 +9,7 @@
 
 void _fatal(char* errorMessage) {
   if (errno == EINTR) {
-    // There was a signal so we need to exit, but it's not en error
+    // There was a signal so we need to exit, but it's not an error
     exit(EXIT_SUCCESS);
   }
   if (errno) {

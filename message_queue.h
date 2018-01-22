@@ -20,7 +20,7 @@
 #define HUBERT_ADDR   0xBABE //!< Hubert's address
 #define FALLBACK_ADDR 0xDEAD //!< Hubert's fallback address
 
-#define MSGMAX        8192   //!< Let's hope that it's the POSIX default value
+#define MSGMAX        8192   //!< Let's hope that's the POSIX default value !
 
 /**
  * A convenience macro
