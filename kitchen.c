@@ -11,12 +11,12 @@
 #include "kitchen.h"
 #include "misc.h"
 
-RequestData* createSharedMemeory() {
-  int shmid = shmget(IPC_PRIVATE, sizeof(RequestData), IPC_CREAT | IPC_ALLWRITE);
-  if (shmid == ERROR) {
+RequestData* createSharedMemeory(int* shmid) {
+  *shmid = shmget(IPC_PRIVATE, sizeof(RequestData), IPC_CREAT | IPC_ALLWRITE);
+  if (*shmid == ERROR) {
     goto error;
   }
-  RequestData* data = shmat(shmid, NULL, IPC_NOFLAGS);
+  RequestData* data = shmat(*shmid, NULL, IPC_NOFLAGS);
   if (data == NULL) {
     goto error;
   }
@@ -81,5 +81,11 @@ void beKitchen(Dish* menu) {
       }
     }
     sleep(10);
+  }
+}
+
+void removeSharedMemeory(int shmid) {
+  if (shmctl(shmid, IPC_RMID, NULL) == ERROR) {
+    fatal("Could not remove message queue");
   }
 }

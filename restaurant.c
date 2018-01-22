@@ -10,11 +10,16 @@
 
 static Connection *con = NULL;
 static Dish* menu = NULL;
+static int shmid = 0;
 
 void sayByeSignalHandler() {
   if (con != NULL) {
     closeConnection(con);
     con = NULL;
+  }
+  if (shmid != 0) {
+    removeSharedMemeory(shmid);
+    shmid = 0;
   }
 }
 
@@ -85,7 +90,7 @@ int main(int argc, char *argv[]) {
   if (argc != 2) {
     fatal("No menu file specified");
   }
-  RequestData* data = createSharedMemeory();
+  RequestData* data = createSharedMemeory(&shmid);
   menu = data->menu;
   readMenu(argv[1], data);
 

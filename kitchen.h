@@ -16,10 +16,12 @@
 
 /**
  * Create shared memory to be used with kitchen
+ * @param shmid
+ * The shmid to be saved to
  * @returns
  * The attched shared memory
  */
-RequestData* createSharedMemeory();
+RequestData* createSharedMemeory(int* shmid);
 
 /**
  * Read menu from file to (shared) memory
@@ -36,5 +38,12 @@ void readMenu(char *menuPath, RequestData *data);
  * The stock to take care of
  */
 void beKitchen(Dish* stock);
+
+/**
+ * Remove the shared memory
+ * @param shmid
+ * The shmid to be removed
+ */
+void removeSharedMemeory(int shmid);
 
 #endif
