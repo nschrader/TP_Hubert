@@ -169,6 +169,7 @@ static void listenToClientCom() {
   }
 }
 
+//! [hubert_main]
 int main() {
   openQueues();
   checkIfSingleton();
@@ -180,3 +181,4 @@ int main() {
 
   return EXIT_SUCCESS;
 }
+//! [hubert_main]

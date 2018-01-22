@@ -10,6 +10,7 @@
 #include "message_queue.h"
 #include "misc.h"
 #include "entity.h"
+#include "hubert.h"
 
 #define SINGLETON 1
 #define ONLY_SEMAPHORE 0

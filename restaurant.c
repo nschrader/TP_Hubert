@@ -86,6 +86,7 @@ static void listenToHubert(Connection* con) {
   }
 }
 
+//! [restaurant_main]
 int main(int argc, char *argv[]) {
   if (argc != 2) {
     fatal("No menu file specified");
@@ -104,3 +105,4 @@ int main(int argc, char *argv[]) {
 
   return EXIT_SUCCESS;
 }
+//! [restaurant_main]

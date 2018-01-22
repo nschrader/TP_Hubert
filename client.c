@@ -4,6 +4,7 @@
 #include "message_queue.h"
 #include "protocol.h"
 #include "misc.h"
+#include "hubert.h"
 
 static void printMenu(Dish* menu) {
   printf("Today's menu:\n");
@@ -65,6 +66,7 @@ static Order* readOrder(Dish* menu) {
   return order;
 }
 
+//! [client_main]
 int main() {
   Connection* con = initConnection(CLIENT_COM);
 
@@ -85,3 +87,4 @@ int main() {
   closeConnection(con);
   return EXIT_SUCCESS;
 }
+//! [client_main]

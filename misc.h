@@ -6,8 +6,6 @@
 #ifndef MISC_H
 #define MISC_H
 
-#define HUBERT_NAME "hubert"//!< Hubert's name to be used everywhere
-
 #define IPC_NOFLAGS   0     //!< Convenience macro
 #define IPC_ALLWRITE  0666  //!< Convenience macro
 
